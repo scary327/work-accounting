@@ -1,0 +1,151 @@
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.accepted {
+  border-left: 4px solid #16a34a;
+}
+
+.rejected {
+  border-left: 4px solid #dc2626;
+  cursor: default;
+}
+
+.rejected:hover {
+  transform: none;
+}
+
+.status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.25rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding-right: 2.5rem;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.author {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+  margin: 0 0 1rem 0;
+}
+
+.stack {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: #4b5563;
+  margin-bottom: 1rem;
+}
+
+.team {
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.teamLabel {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.teamMembers {
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.grade {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: #dcfce7;
+  border-radius: 8px;
+  margin-top: auto;
+}
+
+.gradeScore {
+  font-weight: 700;
+  color: #16a34a;
+  font-size: 1.25rem;
+}
+
+.gradeLabel {
+  font-size: 0.75rem;
+  color: #15803d;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  margin-top: auto;
+  outline: none;
+}
+
+.secondary {
+  background: #f3f4f6;
+  color: #374151;
+  width: 100%;
+}
+
+.secondary:hover {
+  background: #e5e7eb;
+}
+
+.secondary:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .stack {
+    font-size: 0.75rem;
+  }
+}

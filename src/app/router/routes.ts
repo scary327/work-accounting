@@ -9,6 +9,12 @@ const Dashboard = lazy(() =>
   }))
 );
 
+const Archive = lazy(() =>
+  import("../../page/Archive/Archive").then((module) => ({
+    default: module.Archive,
+  }))
+);
+
 const headerProps = {
   logo: "Проектный Практикум",
   navigationLinks: [
@@ -41,9 +47,7 @@ export const PublicRoutes: RouteObject[] = [
   },
   {
     path: URLS.ARCHIVE,
-    element: createPageWithLayout(
-      React.createElement("div", null, "Archive Page")
-    ),
+    element: createPageWithLayout(React.createElement(Archive)),
   },
   {
     path: URLS.STUDENT,
