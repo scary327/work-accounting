@@ -15,6 +15,12 @@ const Archive = lazy(() =>
   }))
 );
 
+const CasesSelection = lazy(() =>
+  import("../../page/CasesSelection/CasesSelection").then((module) => ({
+    default: module.CasesSelection,
+  }))
+);
+
 const headerProps = {
   logo: "Проектный Практикум",
   navigationLinks: [
@@ -35,9 +41,7 @@ export const PublicRoutes: RouteObject[] = [
   },
   {
     path: URLS.CASES_SELECTION,
-    element: createPageWithLayout(
-      React.createElement("div", null, "Cases Selection Page")
-    ),
+    element: createPageWithLayout(React.createElement(CasesSelection)),
   },
   {
     path: URLS.TEAM,

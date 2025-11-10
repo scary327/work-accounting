@@ -1,0 +1,82 @@
+.casesSelection {
+  background: #f8f9fa;
+  padding: 2rem;
+  min-height: 100%;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.btn {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9375rem;
+  outline: none;
+  white-space: nowrap;
+}
+
+.btnPrimary {
+  background: #2563eb;
+  color: white;
+}
+
+.btnPrimary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btnPrimary:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .casesSelection {
+    padding: 1rem;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .casesSelection {
+    padding: 0.75rem;
+  }
+
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+}
