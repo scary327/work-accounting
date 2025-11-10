@@ -1,7 +1,13 @@
-import React from "react";
+import React, { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { URLS } from "./urls";
+
+const Dashboard = lazy(() =>
+  import("../../page/Dashboard/Dashboard").then((module) => ({
+    default: module.Dashboard,
+  }))
+);
 
 const headerProps = {
   logo: "Проектный Практикум",
@@ -19,9 +25,7 @@ const createPageWithLayout = (pageElement: React.ReactNode) =>
 export const PublicRoutes: RouteObject[] = [
   {
     path: URLS.DASHBOARD,
-    element: createPageWithLayout(
-      React.createElement("div", null, "Dashboard Page")
-    ),
+    element: createPageWithLayout(React.createElement(Dashboard)),
   },
   {
     path: URLS.CASES_SELECTION,
