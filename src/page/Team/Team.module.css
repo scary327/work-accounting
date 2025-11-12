@@ -1,7 +1,12 @@
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
+.team {
+  background: #f8f9fa;
   padding: 2rem;
+  min-height: 100%;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .content {
@@ -11,11 +16,17 @@
 }
 
 @media (max-width: 768px) {
-  .container {
+  .team {
     padding: 1rem;
   }
 
   .content {
     gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .team {
+    padding: 0.75rem;
   }
 }

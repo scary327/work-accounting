@@ -168,25 +168,27 @@ export const Team = () => {
   );
 
   return (
-    <div className={styles.container}>
-      <TeamHeader team={teamData} />
+    <div className={styles.team}>
+      <div className={styles.container}>
+        <TeamHeader team={teamData} />
 
-      <div className={styles.content}>
-        <TeamMembers members={teamData.members} />
-        <CurrentProject project={teamData.currentProject} />
-        <ProjectHistory
-          projects={teamData.projectHistory}
-          onSelectProject={handleSelectProject}
-        />
+        <div className={styles.content}>
+          <TeamMembers members={teamData.members} />
+          <CurrentProject project={teamData.currentProject} />
+          <ProjectHistory
+            projects={teamData.projectHistory}
+            onSelectProject={handleSelectProject}
+          />
+        </div>
+
+        {selectedProject && (
+          <ProjectModal
+            project={selectedProject}
+            isOpen={!!selectedProjectId}
+            onClose={handleCloseModal}
+          />
+        )}
       </div>
-
-      {selectedProject && (
-        <ProjectModal
-          project={selectedProject}
-          isOpen={!!selectedProjectId}
-          onClose={handleCloseModal}
-        />
-      )}
     </div>
   );
 };
