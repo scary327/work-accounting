@@ -27,6 +27,12 @@ const Team = lazy(() =>
   }))
 );
 
+const Student = lazy(() =>
+  import("../../page/Student/Student").then((module) => ({
+    default: module.Student,
+  }))
+);
+
 const headerProps = {
   logo: "Проектный Практикум",
   navigationLinks: [
@@ -59,8 +65,6 @@ export const PublicRoutes: RouteObject[] = [
   },
   {
     path: URLS.STUDENT,
-    element: createPageWithLayout(
-      React.createElement("div", null, "Student Page")
-    ),
+    element: createPageWithLayout(React.createElement(Student)),
   },
 ];
