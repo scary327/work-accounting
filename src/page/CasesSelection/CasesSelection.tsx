@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { Button } from "../../components/ui/button";
 import {
   CasesFeed,
   CaseModal,
@@ -212,13 +213,12 @@ export const CasesSelection = () => {
       <div className={styles.container}>
         <header className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>Отбор кейсов</h1>
-          <button
+          <Button
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={() => setIsCreateModalOpen(true)}
-            type="button"
           >
             + Предложить новый кейс
-          </button>
+          </Button>
         </header>
 
         <CasesFeed

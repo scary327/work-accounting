@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { motion } from "framer-motion";
+import { History, BookOpen } from "lucide-react";
 import styles from "./ProjectHistory.module.css";
 import { ProjectCard } from "./ProjectCard";
 
@@ -30,15 +32,35 @@ export const ProjectHistory = ({
     [projects]
   );
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
   return (
-    <div className={styles.section}>
+    <motion.div
+      className={styles.section}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: 0.2 }}
+    >
       <div className={styles.sectionHeader}>
-        <span className={styles.sectionIcon}>📚</span>
+        <History className="w-6 h-6 mr-2 text-primary" />
         <h2 className={styles.sectionTitle}>История проектов</h2>
       </div>
 
       {sortedProjects.length > 0 ? (
-        <div className={styles.projectsGrid}>
+        <motion.div
+          className={styles.projectsGrid}
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
           {sortedProjects.map((project) => (
             <ProjectCard
               key={project.id}
@@ -46,15 +68,15 @@ export const ProjectHistory = ({
               onClick={() => onSelectProject(project.id)}
             />
           ))}
-        </div>
+        </motion.div>
       ) : (
         <div className={styles.placeholder}>
-          <div className={styles.placeholderIcon}>📚</div>
+          <BookOpen className="w-12 h-12 text-muted-foreground mb-4" />
           <div className={styles.placeholderText}>
             Студент ещё не завершил ни одного проекта
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };

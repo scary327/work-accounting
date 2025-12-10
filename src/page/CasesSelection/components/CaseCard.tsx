@@ -1,3 +1,13 @@
+import { motion } from "framer-motion";
+import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
 import styles from "./CaseCard.module.css";
 
 export interface CaseCardData {
@@ -14,96 +24,104 @@ export interface CaseCardData {
 }
 
 interface CaseCardProps {
-  card: CaseCardData;
-  onCardClick?: (cardId: string) => void;
-  onUpvote?: (cardId: string) => void;
-  onDownvote?: (cardId: string) => void;
-  onComments?: (cardId: string) => void;
+  data: CaseCardData;
+  onClick: () => void;
+  onUpvote: () => void;
+  onDownvote: () => void;
+  onComments: () => void;
 }
 
-/**
- * CaseCard component - карточка с описанием кейса
- */
+const MotionCard = motion(Card);
+
 export const CaseCard = ({
-  card,
-  onCardClick,
+  data,
+  onClick,
   onUpvote,
   onDownvote,
   onComments,
 }: CaseCardProps) => {
-  const handleClick = () => {
-    onCardClick?.(card.id);
-  };
-
   const handleUpvoteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onUpvote?.(card.id);
+    onUpvote();
   };
 
   const handleDownvoteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onDownvote?.(card.id);
+    onDownvote();
   };
 
   const handleCommentsClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onComments?.(card.id);
+    onComments();
   };
 
   return (
-    <article
+    <MotionCard
       className={styles.card}
-      onClick={handleClick}
+      onClick={onClick}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          handleClick();
+          onClick();
         }
       }}
     >
-      <div className={styles.header}>
-        <div className={styles.avatar}>{card.authorInitials}</div>
+      <CardHeader className={`${styles.header} p-0 space-y-0`}>
+        <div className={styles.avatar}>{data.authorInitials}</div>
         <div className={styles.headerContent}>
-          <h3 className={styles.title}>{card.title}</h3>
-          <p className={styles.author}>{card.author}</p>
+          <h3 className={styles.title}>{data.title}</h3>
+          <p className={styles.author}>{data.author}</p>
         </div>
-      </div>
+      </CardHeader>
 
-      <p className={styles.description}>{card.description}</p>
-      <span className={styles.stack}>{card.stack}</span>
+      <CardContent className="p-0 mt-4">
+        <p className={styles.description}>{data.description}</p>
+        <div className="mt-3">
+          <Badge variant="secondary" className={styles.stack}>
+            {data.stack}
+          </Badge>
+        </div>
+      </CardContent>
 
-      <div className={styles.actions}>
-        <button
+      <CardFooter className={`${styles.actions} p-0 mt-4`}>
+        <Button
+          variant="ghost"
+          size="sm"
           className={`${styles.actionBtn} ${
-            card.userVote === "up" ? styles.activeUp : ""
-          }`}
+            data.userVote === "up" ? styles.activeUp : ""
+          } hover:bg-transparent`}
           onClick={handleUpvoteClick}
-          type="button"
           title="Поддержать кейс"
         >
-          👍 <span>{card.upvotes}</span>
-        </button>
-        <button
+          <ThumbsUp className="w-4 h-4 mr-2" />
+          <span>{data.upvotes}</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
           className={`${styles.actionBtn} ${
-            card.userVote === "down" ? styles.activeDown : ""
-          }`}
+            data.userVote === "down" ? styles.activeDown : ""
+          } hover:bg-transparent`}
           onClick={handleDownvoteClick}
-          type="button"
           title="Не поддержать кейс"
         >
-          👎 <span>{card.downvotes}</span>
-        </button>
-        <button
-          className={styles.actionBtn}
+          <ThumbsDown className="w-4 h-4 mr-2" />
+          <span>{data.downvotes}</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`${styles.actionBtn} hover:bg-transparent`}
           onClick={handleCommentsClick}
-          type="button"
           title="Комментарии"
         >
-          💬 <span>{card.comments}</span>
-        </button>
-      </div>
-    </article>
+          <MessageSquare className="w-4 h-4 mr-2" />
+          <span>{data.comments}</span>
+        </Button>
+      </CardFooter>
+    </MotionCard>
   );
 };

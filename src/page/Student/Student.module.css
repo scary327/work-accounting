@@ -1,32 +1,25 @@
 .student {
   background: #f8f9fa;
-  padding: 2rem;
   min-height: 100%;
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
-}
-
-.content {
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
 @media (max-width: 768px) {
-  .student {
+  .container {
     padding: 1rem;
-  }
-
-  .content {
-    gap: 1rem;
   }
 }
 
 @media (max-width: 640px) {
-  .student {
+  .container {
     padding: 0.75rem;
   }
 }

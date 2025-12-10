@@ -1,12 +1,9 @@
 import { useMemo, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { StudentHeader, CurrentTeam, ProjectHistory } from "./components";
+import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
 import styles from "./Student.module.css";
-import {
-  StudentHeader,
-  CurrentTeam,
-  ProjectHistory,
-  ProjectModal,
-} from "./components";
 
 interface Project {
   id: string;
@@ -196,11 +193,16 @@ export const Student = () => {
   );
 
   return (
-    <div className={styles.student}>
+    <motion.div
+      className={styles.student}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className={styles.container}>
         <StudentHeader student={studentData} />
 
-        <div className={styles.content}>
+        <div className="flex flex-col gap-6">
           <CurrentTeam
             currentTeam={studentData.currentTeam}
             stats={{
@@ -215,14 +217,32 @@ export const Student = () => {
           />
         </div>
 
-        {selectedProject && (
-          <ProjectModal
-            project={selectedProject}
-            isOpen={!!selectedProjectId}
-            onClose={handleCloseModal}
-          />
-        )}
+        <ProjectDetailsModal
+          isOpen={!!selectedProjectId}
+          onClose={handleCloseModal}
+          data={
+            selectedProject
+              ? {
+                  id: selectedProject.id,
+                  title: selectedProject.title,
+                  mentor: selectedProject.mentor,
+                  description: selectedProject.description,
+                  stack: selectedProject.stack,
+                  teamName: selectedProject.teamName,
+                  teamId: selectedProject.teamId,
+                  teamMembers: selectedProject.teamComposition,
+                  grade: selectedProject.grade,
+                  checkpoints: selectedProject.checkpoints.map((cp) => ({
+                    title: cp.name,
+                    score: cp.score,
+                    comment: cp.comment,
+                  })),
+                  status: "✅ Завершен",
+                }
+              : null
+          }
+        />
       </div>
-    </div>
+    </motion.div>
   );
 };

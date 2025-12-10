@@ -1,4 +1,4 @@
-import styles from "./SearchBar.module.css";
+import { SearchFilter } from "../../../components/SearchFilter";
 
 export interface SearchBarProps {
   searchValue: string;
@@ -8,7 +8,8 @@ export interface SearchBarProps {
 }
 
 /**
- * SearchBar component - строка поиска и фильтрации
+ * SearchBar component - обёртка для Archive страницы
+ * Переделегирует на переиспользуемый SearchFilter
  */
 export const SearchBar = ({
   searchValue,
@@ -17,23 +18,17 @@ export const SearchBar = ({
   onFilterChange,
 }: SearchBarProps) => {
   return (
-    <div className={styles.searchBar}>
-      <input
-        type="text"
-        className={styles.input}
-        placeholder="Поиск по названию кейса, наставнику или стеку..."
-        value={searchValue}
-        onChange={(e) => onSearchChange(e.target.value)}
-      />
-      <select
-        className={styles.select}
-        value={filterValue}
-        onChange={(e) => onFilterChange(e.target.value)}
-      >
-        <option value="all">Все кейсы</option>
-        <option value="accepted">Принятые</option>
-        <option value="rejected">Отклонённые</option>
-      </select>
-    </div>
+    <SearchFilter
+      searchValue={searchValue}
+      filterValue={filterValue}
+      placeholder="Поиск по названию кейса, наставнику или стеку..."
+      filterOptions={[
+        { value: "all", label: "Все кейсы" },
+        { value: "accepted", label: "Принятые" },
+        { value: "rejected", label: "Отклонённые" },
+      ]}
+      onSearchChange={onSearchChange}
+      onFilterChange={onFilterChange}
+    />
   );
 };

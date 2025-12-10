@@ -20,6 +20,7 @@
 }
 
 .input:focus {
+  outline: none;
   border-color: #2563eb;
 }
 
@@ -34,9 +35,11 @@
   min-width: 150px;
   outline: none;
   transition: border-color 0.2s ease;
+  height: auto;
 }
 
 .select:focus {
+  outline: none;
   border-color: #2563eb;
 }
 

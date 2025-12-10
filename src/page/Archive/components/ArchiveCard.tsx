@@ -1,3 +1,4 @@
+import { Button } from "../../../components/ui/button";
 import styles from "./ArchiveCard.module.css";
 
 export interface ArchiveCardData {
@@ -11,6 +12,23 @@ export interface ArchiveCardData {
   teamMembers?: string[];
 }
 
+export interface ModalData {
+  id: string;
+  title: string;
+  author: string;
+  description: string;
+  stack: string;
+  teamName: string;
+  teamMembers: string[];
+  grade: number;
+  checkpoints: Array<{
+    id: string;
+    title: string;
+    score: number;
+    comment: string;
+  }>;
+}
+
 interface ArchiveCardProps {
   card: ArchiveCardData;
   onViewDetails?: (cardId: string) => void;
@@ -18,17 +36,16 @@ interface ArchiveCardProps {
 }
 
 /**
- * ArchiveCard component - карточка архивированного кейса
+ * ArchiveCard component - карточка для страницы архива
  */
 export const ArchiveCard = ({
   card,
   onViewDetails,
   onNominate,
 }: ArchiveCardProps) => {
-  const statusEmoji = card.status === "accepted" ? "✅" : "❌";
   const isAccepted = card.status === "accepted";
 
-  const handleClick = () => {
+  const handleCardClick = () => {
     if (isAccepted) {
       onViewDetails?.(card.id);
     }
@@ -42,64 +59,55 @@ export const ArchiveCard = ({
   return (
     <div
       className={`${styles.card} ${styles[card.status]}`}
-      onClick={handleClick}
-      role={isAccepted ? "button" : undefined}
-      tabIndex={isAccepted ? 0 : undefined}
-      onKeyDown={
-        isAccepted
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleClick();
-              }
-            }
-          : undefined
-      }
+      onClick={handleCardClick}
     >
-      <div className={styles.status}>{statusEmoji}</div>
+      {/* Status */}
+      <div className={styles.status}>{isAccepted ? "✅" : "❌"}</div>
 
+      {/* Title */}
       <h3 className={styles.title}>{card.title}</h3>
+
+      {/* Author */}
       <p className={styles.author}>{card.author}</p>
-      <span className={styles.stack}>{card.stack}</span>
 
-      {isAccepted ? (
-        <>
-          {card.teamName && (
-            <div className={styles.team}>
-              <div className={styles.teamLabel}>{card.teamName}</div>
-              {card.teamMembers && (
-                <div className={styles.teamMembers}>
-                  {card.teamMembers.join(", ")}
-                </div>
-              )}
-            </div>
-          )}
+      {/* Stack */}
+      <div className={styles.stack}>{card.stack}</div>
 
-          {card.grade !== undefined && (
-            <div className={styles.grade}>
-              <div className={styles.gradeScore}>{card.grade}</div>
-              <div className={styles.gradeLabel}>
-                {getGradeLabel(card.grade)}
-              </div>
-            </div>
-          )}
-        </>
-      ) : (
-        <button
-          className={`${styles.btn} ${styles.secondary}`}
+      {/* Team Info */}
+      {isAccepted && card.teamName && (
+        <div className={styles.team}>
+          <div className={styles.teamLabel}>{card.teamName}</div>
+          <div className={styles.teamMembers}>
+            {card.teamMembers?.join(", ")}
+          </div>
+        </div>
+      )}
+
+      {/* Grade */}
+      {isAccepted && card.grade !== undefined && (
+        <div className={styles.grade}>
+          <span className={styles.gradeScore}>{card.grade}/100</span>
+          <span className={styles.gradeLabel}>
+            {card.grade >= 85
+              ? "Отлично"
+              : card.grade >= 70
+              ? "Хорошо"
+              : "Удовлетворительно"}
+          </span>
+        </div>
+      )}
+
+      {/* Button for rejected cases */}
+      {!isAccepted && (
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleNominateClick}
-          type="button"
+          className={styles.btn}
         >
           Выдвинуть на новый семестр
-        </button>
+        </Button>
       )}
     </div>
   );
 };
-
-function getGradeLabel(score: number): string {
-  if (score >= 85) return "Отлично";
-  if (score >= 70) return "Хорошо";
-  if (score >= 55) return "Удовлетворительно";
-  return "Неудовлетворительно";
-}

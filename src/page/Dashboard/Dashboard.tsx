@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
 import {
   CalendarSection,
   TeamWidget,
@@ -76,18 +77,28 @@ export const Dashboard = () => {
       <div className={styles.container}>
         <div className={styles.grid}>
           {/* Main content */}
-          <main className={styles.mainContent}>
+          <motion.main
+            className={styles.mainContent}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
             <CalendarSection
               onTodayClick={handleTodayClick}
               onCreateEventClick={handleCreateEventClick}
             />
-          </main>
+          </motion.main>
 
           {/* Sidebar */}
-          <aside className={styles.sidebar}>
+          <motion.aside
+            className={styles.sidebar}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
             <TeamWidget teams={teams} onTeamClick={handleTeamClick} />
             <ActivityWidget activities={activities} />
-          </aside>
+          </motion.aside>
         </div>
       </div>
     </div>

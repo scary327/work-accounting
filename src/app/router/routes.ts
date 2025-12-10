@@ -1,7 +1,9 @@
 import React, { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { URLS } from "./urls";
+import { Login, Registration } from "../../page/Auth";
 
 const Dashboard = lazy(() =>
   import("../../page/Dashboard/Dashboard").then((module) => ({
@@ -46,6 +48,17 @@ const headerProps = {
 const createPageWithLayout = (pageElement: React.ReactNode) =>
   React.createElement(Layout, { headerProps, children: pageElement });
 
+export const AuthRoutes: RouteObject[] = [
+  {
+    path: URLS.LOGIN,
+    element: React.createElement(Login),
+  },
+  {
+    path: URLS.REGISTRATION,
+    element: React.createElement(Registration),
+  },
+];
+
 export const PublicRoutes: RouteObject[] = [
   {
     path: URLS.DASHBOARD,
@@ -68,3 +81,8 @@ export const PublicRoutes: RouteObject[] = [
     element: createPageWithLayout(React.createElement(Student)),
   },
 ];
+
+export const RootRoute: RouteObject = {
+  path: "/",
+  element: React.createElement(Navigate, { to: URLS.DASHBOARD, replace: true }),
+};

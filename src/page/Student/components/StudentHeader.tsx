@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Mail, Phone, Github } from "lucide-react";
 import styles from "./StudentHeader.module.css";
 
 interface StudentHeaderProps {
@@ -22,7 +24,12 @@ interface StudentHeaderProps {
  */
 export const StudentHeader = ({ student }: StudentHeaderProps) => {
   return (
-    <div className={styles.wrapper}>
+    <motion.div
+      className={styles.wrapper}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className={styles.breadcrumb}>
         <Link to="/" className={styles.breadcrumbLink}>
           Дашборд
@@ -52,20 +59,20 @@ export const StudentHeader = ({ student }: StudentHeaderProps) => {
           </div>
           <div className={styles.contactInfo}>
             <div className={styles.contactItem}>
-              <span className={styles.contactIcon}>📧</span>
+              <Mail className="w-4 h-4 mr-2" />
               <span>{student.email}</span>
             </div>
             <div className={styles.contactItem}>
-              <span className={styles.contactIcon}>📱</span>
+              <Phone className="w-4 h-4 mr-2" />
               <span>{student.phone}</span>
             </div>
             <div className={styles.contactItem}>
-              <span className={styles.contactIcon}>💼</span>
-              <span>GitHub: {student.github}</span>
+              <Github className="w-4 h-4 mr-2" />
+              <span>{student.github}</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

@@ -1,5 +1,5 @@
-import styles from "./SemesterBlock.module.css";
 import { ArchiveCard, type ArchiveCardData } from "./ArchiveCard";
+import styles from "./SemesterBlock.module.css";
 
 interface SemesterBlockProps {
   title: string;

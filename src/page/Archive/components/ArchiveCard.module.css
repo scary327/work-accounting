@@ -3,22 +3,16 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   cursor: pointer;
   position: relative;
   display: flex;
   flex-direction: column;
-  outline: none;
 }
 
 .card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
-}
-
-.card:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
 }
 
 .accepted {
@@ -47,14 +41,12 @@
   margin-bottom: 0.5rem;
   padding-right: 2.5rem;
   color: #1a1a1a;
-  margin: 0 0 0.5rem 0;
 }
 
 .author {
   font-size: 0.875rem;
   color: #6b7280;
   margin-bottom: 1rem;
-  margin: 0 0 1rem 0;
 }
 
 .stack {
@@ -87,7 +79,7 @@
 }
 
 .grade {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.75rem;
@@ -115,23 +107,20 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   font-size: 0.875rem;
   margin-top: auto;
   outline: none;
-}
-
-.secondary {
+  width: 100%;
   background: #f3f4f6;
   color: #374151;
-  width: 100%;
 }
 
-.secondary:hover {
+.btn:hover {
   background: #e5e7eb;
 }
 
-.secondary:focus-visible {
+.btn:focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }

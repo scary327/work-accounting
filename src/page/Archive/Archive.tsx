@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import {
   SearchBar,
   SemesterBlock,
-  ArchiveModal,
   type ArchiveCardData,
   type ModalData,
 } from "./components";
+import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
 import styles from "./Archive.module.css";
 
 /**
@@ -250,6 +251,16 @@ export const Archive = () => {
   // Фильтрация карточек
   const filterCards = useCallback(
     (cards: ArchiveCardData[]): ArchiveCardData[] => {
+      // Если поиск пуст, фильтруем только по статусу
+      if (!searchValue || searchValue.trim() === "") {
+        return cards.filter((card) => {
+          const matchesFilter =
+            filterValue === "all" || card.status === filterValue;
+          return matchesFilter;
+        });
+      }
+
+      // Иначе фильтруем по поиску и статусу
       return cards.filter((card) => {
         const matchesSearch =
           card.title.toLowerCase().includes(searchValue.toLowerCase()) ||
@@ -322,16 +333,36 @@ export const Archive = () => {
         )}
 
         {filteredFallCards.length === 0 && filteredSpringCards.length === 0 && (
-          <div className={styles.emptyState}>
+          <motion.div
+            className={styles.emptyState}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             <p>Кейсы не найдены</p>
-          </div>
+          </motion.div>
         )}
       </div>
 
-      <ArchiveModal
+      <ProjectDetailsModal
         isOpen={selectedCardId !== null}
-        data={selectedModalData}
         onClose={() => setSelectedCardId(null)}
+        data={
+          selectedModalData
+            ? {
+                id: selectedModalData.id,
+                title: selectedModalData.title,
+                mentor: selectedModalData.author,
+                description: selectedModalData.description,
+                stack: selectedModalData.stack.split(", "),
+                teamName: selectedModalData.teamName,
+                teamMembers: selectedModalData.teamMembers,
+                grade: selectedModalData.grade,
+                checkpoints: selectedModalData.checkpoints,
+                status: "✅ Принят",
+              }
+            : null
+        }
       />
     </div>
   );

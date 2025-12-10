@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import styles from "./TeamHeader.module.css";
 
 interface TeamHeaderProps {
@@ -15,7 +16,12 @@ interface TeamHeaderProps {
  */
 export const TeamHeader = memo(({ team }: TeamHeaderProps) => {
   return (
-    <div className={styles.header}>
+    <motion.div
+      className={styles.header}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className={styles.breadcrumb}>
         <Link to="/dashboard" className={styles.link}>
           Дашборд
@@ -30,7 +36,7 @@ export const TeamHeader = memo(({ team }: TeamHeaderProps) => {
         Создана: {team.createdSemester} • Завершено проектов:{" "}
         {team.completedProjects}
       </div>
-    </div>
+    </motion.div>
   );
 });
 

@@ -1,4 +1,6 @@
 export const URLS = {
+  LOGIN: "/login",
+  REGISTRATION: "/registration",
   DASHBOARD: "/dashboard",
   TEAM: "/team/:id",
   ARCHIVE: "/archive",

@@ -1,13 +1,14 @@
 import { useMemo, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import styles from "./Team.module.css";
 import {
   TeamHeader,
   TeamMembers,
   CurrentProject,
   ProjectHistory,
-  ProjectModal,
 } from "./components";
+import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
 
 interface Member {
   id: string;
@@ -168,7 +169,12 @@ export const Team = () => {
   );
 
   return (
-    <div className={styles.team}>
+    <motion.div
+      className={styles.team}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className={styles.container}>
         <TeamHeader team={teamData} />
 
@@ -181,14 +187,31 @@ export const Team = () => {
           />
         </div>
 
-        {selectedProject && (
-          <ProjectModal
-            project={selectedProject}
-            isOpen={!!selectedProjectId}
-            onClose={handleCloseModal}
-          />
-        )}
+        <ProjectDetailsModal
+          isOpen={!!selectedProjectId}
+          onClose={handleCloseModal}
+          data={
+            selectedProject
+              ? {
+                  id: selectedProject.id,
+                  title: selectedProject.title,
+                  mentor: selectedProject.mentor,
+                  description: selectedProject.description,
+                  stack: selectedProject.stack,
+                  teamName: teamData.name,
+                  teamMembers: selectedProject.teamComposition,
+                  grade: selectedProject.grade,
+                  checkpoints: selectedProject.checkpoints.map((cp) => ({
+                    title: cp.name,
+                    score: cp.score,
+                    comment: cp.comment,
+                  })),
+                  status: "✅ Завершен",
+                }
+              : null
+          }
+        />
       </div>
-    </div>
+    </motion.div>
   );
 };
