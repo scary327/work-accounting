@@ -2,6 +2,11 @@ import apiClient from "./apiClient";
 import type { CreateSemesterRequest, SemesterResponse } from "./types";
 
 export const semestersApi = {
+  getSemesters: async (): Promise<SemesterResponse[]> => {
+    const response = await apiClient.get<SemesterResponse[]>("/semesters");
+    return response.data;
+  },
+
   createSemester: async (
     data: CreateSemesterRequest
   ): Promise<SemesterResponse> => {

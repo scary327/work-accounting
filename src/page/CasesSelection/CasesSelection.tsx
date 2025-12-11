@@ -24,7 +24,7 @@ export const CasesSelection = () => {
   const cases: CaseCardData[] = useMemo(
     () => [
       {
-        id: "case-1",
+        id: "1",
         title: "Система аналитики транзакций",
         author: "Иван Петров",
         authorInitials: "ИП",
@@ -34,10 +34,10 @@ export const CasesSelection = () => {
         upvotes: 12,
         downvotes: 2,
         comments: 8,
-        userVote: userVotes["case-1"] || null,
+        userVote: userVotes["1"] || null,
       },
       {
-        id: "case-2",
+        id: "2",
         title: "Мобильное приложение для инвестиций",
         author: "Анна Смирнова",
         authorInitials: "АС",
@@ -47,10 +47,10 @@ export const CasesSelection = () => {
         upvotes: 9,
         downvotes: 1,
         comments: 5,
-        userVote: userVotes["case-2"] || null,
+        userVote: userVotes["2"] || null,
       },
       {
-        id: "case-3",
+        id: "3",
         title: "API Gateway для микросервисов",
         author: "Дмитрий Козлов",
         authorInitials: "ДК",
@@ -60,7 +60,7 @@ export const CasesSelection = () => {
         upvotes: 15,
         downvotes: 0,
         comments: 12,
-        userVote: userVotes["case-3"] || null,
+        userVote: userVotes["3"] || null,
       },
     ],
     [userVotes]
@@ -68,8 +68,8 @@ export const CasesSelection = () => {
 
   const caseModalDataMap = useMemo(
     (): Record<string, CaseModalData> => ({
-      "case-1": {
-        id: "case-1",
+      "1": {
+        id: "1",
         title: "Система аналитики транзакций",
         author: "Иван Петров",
         description:
@@ -97,10 +97,10 @@ export const CasesSelection = () => {
             text: "Какой опыт требуется? Я работала с React и Spring.",
           },
         ],
-        userVote: userVotes["case-1"] || null,
+        userVote: userVotes["1"] || null,
       },
-      "case-2": {
-        id: "case-2",
+      "2": {
+        id: "2",
         title: "Мобильное приложение для инвестиций",
         author: "Анна Смирнова",
         description:
@@ -116,10 +116,10 @@ export const CasesSelection = () => {
         upvotes: 9,
         downvotes: 1,
         comments: [{ id: "c1", author: "Сергей", text: "Отличная идея!" }],
-        userVote: userVotes["case-2"] || null,
+        userVote: userVotes["2"] || null,
       },
-      "case-3": {
-        id: "case-3",
+      "3": {
+        id: "3",
         title: "API Gateway для микросервисов",
         author: "Дмитрий Козлов",
         description:
@@ -151,7 +151,7 @@ export const CasesSelection = () => {
             text: "Да, желателен опыт работы с K8s",
           },
         ],
-        userVote: userVotes["case-3"] || null,
+        userVote: userVotes["3"] || null,
       },
     }),
     [userVotes]
