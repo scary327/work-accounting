@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "../../components/ui/button";
+import { projectsApi } from "../../api";
 import {
   CasesFeed,
   CaseModal,
@@ -190,16 +191,28 @@ export const CasesSelection = () => {
   );
 
   const handleCreateCase = useCallback(
-    (formData: {
+    async (formData: {
       title: string;
       description: string;
       stack: string;
       teamSize: number;
     }) => {
-      alert(
-        `Кейс "${formData.title}" успешно создан и добавлен в ленту! Размер команды: ${formData.teamSize}`
-      );
-      setIsCreateModalOpen(false);
+      try {
+        await projectsApi.createProject({
+          title: formData.title,
+          description: formData.description,
+          techStack: formData.stack,
+          teamSize: formData.teamSize,
+          mentorIds: [], // TODO: Add mentor selection
+        });
+        alert(
+          `Кейс "${formData.title}" успешно создан и добавлен в ленту! Размер команды: ${formData.teamSize}`
+        );
+        setIsCreateModalOpen(false);
+      } catch (error) {
+        console.error("Failed to create project:", error);
+        alert("Не удалось создать кейс. Попробуйте позже.");
+      }
     },
     []
   );

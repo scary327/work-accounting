@@ -1,8 +1,9 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { StudentHeader, CurrentTeam, ProjectHistory } from "./components";
 import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
+import { studentApi } from "../../api";
 import styles from "./Student.module.css";
 
 interface Project {
@@ -47,137 +48,78 @@ interface StudentData {
  */
 export const Student = () => {
   const { id: studentId } = useParams<{ id: string }>();
+  const [studentData, setStudentData] = useState<StudentData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null
   );
 
-  // Моковые данные для студента
-  const studentData = useMemo<StudentData>(
-    () => ({
-      id: studentId || "alexey-ivanov",
-      name: "Алексей Иванов",
-      avatar: "АИ",
-      email: "a.ivanov@student.university.edu",
-      phone: "+7 (999) 123-45-67",
-      github: "@alexivanov",
-      projectsCompleted: 3,
-      averageGrade: 87,
-      teamsCount: 2,
-      currentTeam: {
-        id: "alpha",
-        name: "Команда Alpha",
-        currentProject: "Система аналитики транзакций",
-      },
-      projects: [
-        {
-          id: "proj-1",
-          semester: "Весна 2025",
-          title: "Система управления документами",
-          mentor: "Владимир Попов",
-          teamName: "Команда Alpha",
-          teamId: "alpha",
-          stack: ["Vue.js", "Django", "PostgreSQL"],
-          grade: 82,
-          description:
-            "Разработка системы электронного документооборота с возможностью создания, согласования и хранения документов. Проект включает систему прав доступа, версионирование документов и интеграцию с электронной подписью.",
-          checkpoints: [
-            {
-              name: "Планирование и дизайн",
-              score: 85,
-              comment: "Хорошо продумана архитектура системы, точные сроки",
-            },
-            {
-              name: "Разработка MVP",
-              score: 80,
-              comment: "Основной функционал реализован, требует оптимизации",
-            },
-            {
-              name: "Тестирование и финализация",
-              score: 82,
-              comment: "Хорошее покрытие тестами, есть небольшие баги",
-            },
-          ],
-          teamComposition: [
-            "Алексей Иванов",
-            "Мария Петрова",
-            "Дмитрий Волков",
-          ],
-        },
-        {
-          id: "proj-2",
-          semester: "Осень 2024",
-          title: "Чат-бот для поддержки клиентов",
-          mentor: "Светлана Романова",
-          teamName: "Команда Alpha",
-          teamId: "alpha",
-          stack: ["Python", "NLP", "Rasa"],
-          grade: 91,
-          description:
-            "Разработка интеллектуального чат-бота на базе Rasa для автоматизации ответов на часто задаваемые вопросы. Система способна обучаться на новых диалогах и совершенствовать свои ответы.",
-          checkpoints: [
-            {
-              name: "Разработка базовых моделей NLP",
-              score: 92,
-              comment:
-                "Отличная работа с моделями, высокая точность распознавания",
-            },
-            {
-              name: "Интеграция с системой поддержки",
-              score: 90,
-              comment: "Хорошо интегрирован, требует небольших улучшений",
-            },
-            {
-              name: "Обучение и тестирование",
-              score: 91,
-              comment: "Боту хорошо удаётся обслуживать пользователей",
-            },
-          ],
-          teamComposition: [
-            "Алексей Иванов",
-            "Сергей Сидоров",
-            "Елена Козлова",
-            "Константин Зайцев",
-          ],
-        },
-        {
-          id: "proj-3",
-          semester: "Весна 2024",
-          title: "Мобильное приложение для инвестиций",
-          mentor: "Анна Смирнова",
-          teamName: "Команда Beta",
-          teamId: "beta",
-          stack: ["React Native", "Node.js", "MongoDB"],
-          grade: 88,
-          description:
-            "Разработка мобильного приложения для управления инвестиционным портфелем с возможностью отслеживания котировок в реальном времени, аналитикой доходности и рекомендациями по диверсификации.",
-          checkpoints: [
-            {
-              name: "UI/UX дизайн и прототип",
-              score: 90,
-              comment: "Отличный дизайн, интуитивный интерфейс",
-            },
-            {
-              name: "Разработка core функционала",
-              score: 87,
-              comment: "Хорошая реализация основных возможностей",
-            },
-            {
-              name: "Тестирование и релиз",
-              score: 88,
-              comment: "Приложение стабильно работает на iOS и Android",
-            },
-          ],
-          teamComposition: [
-            "Алексей Иванов",
-            "Ольга Новикова",
-            "Максим Федоров",
-          ],
-        },
-      ],
-    }),
-    [studentId]
-  );
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      if (!studentId) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const data = await studentApi.getStudentDetails(studentId);
+
+        // Helper to get initials
+        const getInitials = (name: string) => {
+          return name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+        };
+
+        const mappedData: StudentData = {
+          id: data.id.toString(),
+          name: data.fullname,
+          avatar: getInitials(data.fullname),
+          email: "Нет данных", // Missing in API
+          phone: "Нет данных", // Missing in API
+          github: "Нет данных", // Missing in API
+          projectsCompleted: data.completedProjectsCount,
+          averageGrade: data.averageGrade,
+          teamsCount: data.teamsCount,
+          currentTeam: data.currentTeam
+            ? {
+                id: "unknown", // Missing in API
+                name: data.currentTeam,
+                currentProject:
+                  data.currentProject?.projectTitle || "Нет активного проекта",
+              }
+            : null,
+          projects: data.projectHistory.map((p) => ({
+            id: p.projectId.toString(),
+            semester: p.semesterName,
+            title: p.projectTitle,
+            mentor: "Нет данных", // Missing in API
+            teamName: "Нет данных", // Missing in API
+            teamId: "unknown", // Missing in API
+            stack: [], // Missing in API
+            grade: 0, // Missing in API
+            description: "Нет описания", // Missing in API
+            checkpoints: [], // Missing in API
+            teamComposition: [], // Missing in API
+          })),
+        };
+
+        setStudentData(mappedData);
+      } catch (err) {
+        console.error("Failed to fetch student details:", err);
+        setError("Не удалось загрузить данные студента");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStudentData();
+  }, [studentId]);
 
   const handleSelectProject = useCallback((projectId: string) => {
     setSelectedProjectId(projectId);
@@ -188,9 +130,27 @@ export const Student = () => {
   }, []);
 
   const selectedProject = useMemo(
-    () => studentData.projects.find((p) => p.id === selectedProjectId),
-    [selectedProjectId, studentData.projects]
+    () => studentData?.projects.find((p) => p.id === selectedProjectId),
+    [selectedProjectId, studentData]
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg text-gray-600">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (error || !studentData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg text-red-600">
+          {error || "Студент не найден"}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div

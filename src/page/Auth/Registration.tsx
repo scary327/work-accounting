@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAtom } from "@reatom/npm-react";
-import Cookies from "js-cookie";
 import { URLS } from "../../app/router/urls";
 import { authApi } from "../../api";
-import { tokenManager } from "../../api/tokenManager";
-import { userAtom, isRegisteredAtom } from "../../model/user";
+import { NotificationContainer } from "../../components/Notification";
+import { useNotifications } from "../../hooks/useNotifications";
 import styles from "./Auth.module.css";
 
 export const Registration = () => {
   const navigate = useNavigate();
+  const { notifications, addNotification } = useNotifications();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -21,8 +20,6 @@ export const Registration = () => {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [, setUser] = useAtom(userAtom);
-  const [, setIsRegistered] = useAtom(isRegisteredAtom);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,7 +46,7 @@ export const Registration = () => {
     setIsLoading(true);
 
     try {
-      const response = await authApi.register({
+      await authApi.register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         middleName: formData.middleName,
@@ -57,31 +54,25 @@ export const Registration = () => {
         password: formData.password,
       });
 
-      // Сохранить токены в cookies (через tokenManager)
-      tokenManager.setTokens(response.accessToken, response.refreshToken);
+      // Registration now returns only user object, no tokens
+      // Show success notification
+      addNotification("Успешная регистрация", "success", 3000);
 
-      // Сохранить информацию о пользователе в Reatom и Cookies
-      setUser(response.user);
-      setIsRegistered(true);
-
-      Cookies.set("user", JSON.stringify(response.user), {
-        secure: true,
-        sameSite: "strict",
-      });
-      Cookies.set("isRegistered", "true", { secure: true, sameSite: "strict" });
-
-      // После успешной регистрации перенаправить на дашборд
-      navigate(URLS.DASHBOARD);
+      // Redirect to login page after a short delay to let the notification show
+      setTimeout(() => {
+        navigate(URLS.LOGIN);
+      }, 500);
     } catch (err) {
       const apiError = err as {
         response?: { data?: { message?: string } };
         message?: string;
       };
-      setError(
+      const errorMessage =
         apiError?.response?.data?.message ||
-          apiError?.message ||
-          "Ошибка при регистрации. Попробуйте позже."
-      );
+        apiError?.message ||
+        "Ошибка при регистрации. Попробуйте позже.";
+      setError(errorMessage);
+      addNotification(errorMessage, "error", 4000);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -110,6 +101,7 @@ export const Registration = () => {
 
   return (
     <div className={styles.authContainer}>
+      <NotificationContainer notifications={notifications} onClose={() => {}} />
       <motion.div
         className={styles.authCard}
         initial={{ opacity: 0, scale: 0.95 }}

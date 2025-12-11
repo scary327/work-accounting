@@ -36,6 +36,12 @@ const Student = lazy(() =>
   }))
 );
 
+const Semesters = lazy(() =>
+  import("../../page/Semesters/Semesters").then((module) => ({
+    default: module.Semesters,
+  }))
+);
+
 export const AuthRoutes: RouteObject[] = [
   {
     path: URLS.LOGIN,
@@ -82,6 +88,12 @@ export const PublicRoutes: RouteObject[] = [
     path: URLS.STUDENT,
     element: React.createElement(RequireAuth, {
       children: React.createElement(Student),
+    }),
+  },
+  {
+    path: URLS.SEMESTERS,
+    element: React.createElement(RequireAuth, {
+      children: React.createElement(Semesters),
     }),
   },
 ];

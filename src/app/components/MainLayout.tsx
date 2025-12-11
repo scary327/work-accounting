@@ -13,6 +13,7 @@ export const MainLayout = () => {
       { id: "dashboard", label: "Дашборд", href: URLS.DASHBOARD },
       { id: "cases", label: "Отбор кейсов", href: URLS.CASES_SELECTION },
       { id: "archive", label: "Архив", href: URLS.ARCHIVE },
+      { id: "semesters", label: "Семестры", href: URLS.SEMESTERS },
     ],
     userInfo: {
       initials: user ? `${user.firstName[0]}${user.lastName[0]}` : "Г",

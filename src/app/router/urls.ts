@@ -6,4 +6,5 @@ export const URLS = {
   ARCHIVE: "/archive",
   STUDENT: "/student/:id",
   CASES_SELECTION: "/cases-selection",
+  SEMESTERS: "/semesters",
 };

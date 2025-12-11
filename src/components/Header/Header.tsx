@@ -1,5 +1,8 @@
-import { type ReactNode, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { type ReactNode, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAtom } from "@reatom/npm-react";
+import Cookies from "js-cookie";
+import { userAtom, isRegisteredAtom } from "../../model/user";
 import styles from "./Header.module.css";
 
 export interface NavLink {
@@ -40,12 +43,36 @@ export const Header = ({
   onNavLinkClick,
   className,
 }: HeaderProps) => {
+  const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [, setUser] = useAtom(userAtom);
+  const [, setIsRegistered] = useAtom(isRegisteredAtom);
+
   const handleNavLinkClick = useMemo(
     () => (linkId: string) => {
       onNavLinkClick?.(linkId);
     },
     [onNavLinkClick]
   );
+
+  const handleLogout = () => {
+    // Clear auth cookies using js-cookie library
+    Cookies.remove("user");
+    Cookies.remove("isRegistered");
+    Cookies.remove("accessToken");
+    Cookies.remove("refreshToken");
+
+    // Clear Reatom atoms
+    setUser(null);
+    setIsRegistered(false);
+
+    setIsMenuOpen(false);
+    navigate("/login");
+  };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   return (
     <header className={`${styles.navbar} ${className || ""}`}>
@@ -74,11 +101,28 @@ export const Header = ({
         </div>
 
         <div className={styles.userInfo}>
-          <div
-            className={styles.userAvatar}
-            title={userInfo.name || userInfo.initials}
-          >
-            {userInfo.initials}
+          <div className={styles.userMenuWrapper}>
+            <div
+              className={styles.userButton}
+              onClick={toggleMenu}
+              role="button"
+              tabIndex={0}
+            >
+              <span className={styles.userName}>{userInfo.name}</span>
+              <div
+                className={styles.userAvatar}
+                title={userInfo.name || userInfo.initials}
+              >
+                {userInfo.initials}
+              </div>
+            </div>
+            {isMenuOpen && (
+              <div className={styles.userMenu}>
+                <button className={styles.logoutButton} onClick={handleLogout}>
+                  Выйти
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </nav>
