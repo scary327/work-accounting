@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAtom } from "@reatom/npm-react";
+import Cookies from "js-cookie";
 import { URLS } from "../../app/router/urls";
 import { authApi } from "../../api";
+import { tokenManager } from "../../api/tokenManager";
+import { userAtom, isRegisteredAtom } from "../../model/user";
 import styles from "./Auth.module.css";
 
 export const Registration = () => {
@@ -17,6 +21,8 @@ export const Registration = () => {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [, setUser] = useAtom(userAtom);
+  const [, setIsRegistered] = useAtom(isRegisteredAtom);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -51,12 +57,21 @@ export const Registration = () => {
         password: formData.password,
       });
 
-      console.log("Registration successful:", response);
+      // Сохранить токены в cookies (через tokenManager)
+      tokenManager.setTokens(response.accessToken, response.refreshToken);
 
-      // После успешной регистрации перенаправить на логин
-      navigate(URLS.LOGIN, {
-        state: { message: "Регистрация успешна. Войдите в свой аккаунт." },
+      // Сохранить информацию о пользователе в Reatom и Cookies
+      setUser(response.user);
+      setIsRegistered(true);
+
+      Cookies.set("user", JSON.stringify(response.user), {
+        secure: true,
+        sameSite: "strict",
       });
+      Cookies.set("isRegistered", "true", { secure: true, sameSite: "strict" });
+
+      // После успешной регистрации перенаправить на дашборд
+      navigate(URLS.DASHBOARD);
     } catch (err) {
       const apiError = err as {
         response?: { data?: { message?: string } };

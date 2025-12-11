@@ -1,28 +1,35 @@
+import Cookies from "js-cookie";
 import type { AuthTokens } from "./types";
 
 export const tokenManager = {
   setTokens: (accessToken: string, refreshToken: string): void => {
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
+    Cookies.set("accessToken", accessToken, {
+      secure: true,
+      sameSite: "strict",
+    });
+    Cookies.set("refreshToken", refreshToken, {
+      secure: true,
+      sameSite: "strict",
+    });
   },
 
   getTokens: (): AuthTokens => {
     return {
-      accessToken: localStorage.getItem("accessToken") || "",
-      refreshToken: localStorage.getItem("refreshToken") || "",
+      accessToken: Cookies.get("accessToken") || "",
+      refreshToken: Cookies.get("refreshToken") || "",
     };
   },
 
   getAccessToken: (): string | null => {
-    return localStorage.getItem("accessToken");
+    return Cookies.get("accessToken") || null;
   },
 
   getRefreshToken: (): string | null => {
-    return localStorage.getItem("refreshToken");
+    return Cookies.get("refreshToken") || null;
   },
 
   clearTokens: (): void => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    Cookies.remove("accessToken");
+    Cookies.remove("refreshToken");
   },
 };

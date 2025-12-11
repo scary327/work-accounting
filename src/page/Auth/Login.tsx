@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAtom } from "@reatom/npm-react";
+import Cookies from "js-cookie";
 import { URLS } from "../../app/router/urls";
 import { authApi } from "../../api";
 import { tokenManager } from "../../api/tokenManager";
+import { userAtom, isRegisteredAtom } from "../../model/user";
 import styles from "./Auth.module.css";
 
 export const Login = () => {
@@ -12,6 +15,8 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [, setUser] = useAtom(userAtom);
+  const [, setIsRegistered] = useAtom(isRegisteredAtom);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +26,18 @@ export const Login = () => {
     try {
       const response = await authApi.login({ email, password });
 
-      // Сохранить токены в localStorage
+      // Сохранить токены в cookies (через tokenManager)
       tokenManager.setTokens(response.accessToken, response.refreshToken);
+
+      // Сохранить информацию о пользователе в Reatom и Cookies
+      setUser(response.user);
+      setIsRegistered(true);
+
+      Cookies.set("user", JSON.stringify(response.user), {
+        secure: true,
+        sameSite: "strict",
+      });
+      Cookies.set("isRegistered", "true", { secure: true, sameSite: "strict" });
 
       navigate(URLS.DASHBOARD);
     } catch (err) {
