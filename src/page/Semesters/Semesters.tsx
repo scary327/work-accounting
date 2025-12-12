@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../../components/ui/button";
+import { ConfirmDialog } from "../../components/ui/confirm-dialog";
+import { NotificationContainer } from "../../components/Notification";
+import { useNotifications } from "../../hooks/useNotifications";
 import {
   useSemesters,
   useCreateSemester,
   useActivateSemester,
+  useDeleteSemester,
+  useUpdateSemester,
 } from "../../api/hooks/useSemesters";
 import { SemesterCard } from "./components/SemesterCard";
 import { SemesterModal } from "./components/SemesterModal";
@@ -14,10 +19,16 @@ import styles from "./Semesters.module.css";
 export const Semesters = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSemester, setEditingSemester] = useState<Semester | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [semesterToDelete, setSemesterToDelete] = useState<number | null>(null);
 
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
   const { data: semesters = [] } = useSemesters();
   const createMutation = useCreateSemester();
   const activateMutation = useActivateSemester();
+  const deleteMutation = useDeleteSemester();
+  const updateMutation = useUpdateSemester();
 
   const handleCreate = async (data: Omit<Semester, "id" | "isActive">) => {
     try {
@@ -28,19 +39,44 @@ export const Semesters = () => {
     }
   };
 
-  const handleUpdate = (data: Omit<Semester, "id" | "isActive">) => {
+  const handleUpdate = async (data: Omit<Semester, "id" | "isActive">) => {
     if (!editingSemester) return;
-    // TODO: Реализовать обновление семестра через API
-    console.log("Update not implemented yet", data);
-    setIsModalOpen(false);
-    setEditingSemester(null);
+    try {
+      await updateMutation.mutateAsync({
+        id: editingSemester.id,
+        data,
+      });
+      addNotification("Семестр успешно обновлён", "success");
+      setIsModalOpen(false);
+      setEditingSemester(null);
+    } catch (error) {
+      console.error("Ошибка при обновлении семестра:", error);
+      addNotification("Ошибка при обновлении семестра", "error");
+    }
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm("Вы уверены, что хотите удалить этот семестр?")) {
-      // TODO: Реализовать удаление семестра через API
-      console.log("Delete not implemented yet", id);
+    setSemesterToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (semesterToDelete === null) return;
+
+    try {
+      await deleteMutation.mutateAsync(semesterToDelete);
+      addNotification("Семестр успешно удалён", "success");
+      setDeleteConfirmOpen(false);
+      setSemesterToDelete(null);
+    } catch (error) {
+      console.error("Ошибка при удалении семестра:", error);
+      addNotification("Ошибка при удалении семестра", "error");
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmOpen(false);
+    setSemesterToDelete(null);
   };
 
   const handleActivate = async (id: number) => {
@@ -63,6 +99,11 @@ export const Semesters = () => {
 
   return (
     <div className={styles.semestersPage}>
+      <NotificationContainer
+        notifications={notifications}
+        onClose={removeNotification}
+      />
+
       <div className={styles.container}>
         <header className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>Управление семестрами</h1>
@@ -92,7 +133,22 @@ export const Semesters = () => {
         onSubmit={editingSemester ? handleUpdate : handleCreate}
         onActivate={handleActivate}
         initialData={editingSemester}
-        isLoading={createMutation.isPending || activateMutation.isPending}
+        isLoading={
+          createMutation.isPending ||
+          activateMutation.isPending ||
+          updateMutation.isPending
+        }
+      />
+
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        title="Удалить семестр?"
+        message="Вы уверены, что хотите удалить этот семестр? Это действие нельзя отменить."
+        confirmText="Удалить"
+        cancelText="Отмена"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
       />
     </div>
   );

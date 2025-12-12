@@ -11,6 +11,7 @@ const buttonVariants = cva(
       variant: {
         primary: "bg-blue-500 text-white hover:bg-blue-600",
         outline: "border border-input bg-white hover:bg-gray-50",
+        danger: "bg-red-500 text-white hover:bg-red-600",
       },
       size: {
         sm: "h-8 px-3 py-1 text-xs",

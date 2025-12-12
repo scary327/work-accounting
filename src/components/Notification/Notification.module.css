@@ -1,53 +1,52 @@
-.container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
+.notification {
+  /* Возвращаем взаимодействие с мышью для самого уведомления */
+  pointer-events: auto;
+
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  pointer-events: none;
-  z-index: 9999;
-}
+  position: relative;
+  /* overflow: hidden нужен, чтобы прогресс-бар обрезался по закругленным краям */
+  overflow: hidden;
 
-.notification {
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   min-width: 300px;
   max-width: 400px;
+  padding: 16px 20px 20px 16px; /* Чуть больше паддинг снизу для контента */
+
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+
+  /* Важно для работы transform анимаций без мыла */
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .notification.success {
-  background-color: #d4edda;
+  background-color: #fff;
+  border-left: 4px solid #28a745;
   color: #155724;
-  border: 1px solid #c3e6cb;
 }
 
 .notification.error {
-  background-color: #f8d7da;
+  background-color: #fff;
+  border-left: 4px solid #dc3545;
   color: #721c24;
-  border: 1px solid #f5c6cb;
 }
 
 .notification.info {
-  background-color: #ffffff;
-  color: #333333;
-  border: 1px solid #e0e0e0;
+  background-color: #fff;
+  border-left: 4px solid #007bff;
+  color: #333;
 }
 
 .content {
   display: flex;
-  align-items: center;
-  flex: 1;
+  align-items: flex-start;
+  padding-right: 16px;
+  margin-bottom: 4px; /* Отступ до прогресс бара визуальный */
 }
 
 .message {
@@ -55,33 +54,32 @@
 }
 
 .closeButton {
-  flex-shrink: 0;
+  position: absolute;
+  top: 8px;
+  right: 8px;
   background: none;
   border: none;
-  color: inherit;
   cursor: pointer;
-  font-size: 18px;
-  padding: 0;
-  width: 24px;
-  height: 24px;
+  color: inherit;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
+  font-size: 16px;
 }
 
 .closeButton:hover {
   opacity: 1;
 }
 
-@media (max-width: 640px) {
-  .notification {
-    min-width: 250px;
-  }
-
-  .container {
-    bottom: 12px;
-    right: 12px;
-  }
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px; /* Толщина полоски */
+  background-color: currentColor; /* Наследует цвет текста (зеленый/красный/синий) */
+  opacity: 0.3;
 }

@@ -20,4 +20,19 @@ export const semestersApi = {
     );
     return response.data;
   },
+
+  deleteSemester: async (id: number): Promise<void> => {
+    await apiClient.delete(`/semesters/${id}`);
+  },
+
+  updateSemester: async (
+    id: number,
+    data: CreateSemesterRequest
+  ): Promise<SemesterResponse> => {
+    const response = await apiClient.put<SemesterResponse>(
+      `/semesters/${id}`,
+      data
+    );
+    return response.data;
+  },
 };
