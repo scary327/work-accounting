@@ -99,6 +99,54 @@ export interface ProjectResponse {
   userVote: boolean | null;
 }
 
+export interface ProjectDetailsResponse {
+  id: number;
+  title: string;
+  description: string;
+  techStack: string;
+  status: string;
+  semesterId: number;
+  semesterName: string;
+  likesCount: number;
+  dislikesCount: number;
+  commentsCount: number;
+  creatorId: number;
+  creatorFio: string;
+  userVote: boolean | null;
+  mentors: Array<{
+    id: number;
+    fullName: string;
+  }>;
+}
+
+export interface ProjectComment {
+  id: number;
+  body: string;
+  authorId: number;
+  authorName: string;
+  createdAt: string;
+}
+
+export interface PaginatedResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface GetProjectsRequest {
+  page?: number;
+  size?: number;
+  sort?: string[];
+}
+
+export interface GetCommentsRequest {
+  page?: number;
+  size?: number;
+  sort?: string[];
+}
+
 // Semester types
 export interface CreateSemesterRequest {
   name: string;

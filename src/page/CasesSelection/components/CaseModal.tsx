@@ -15,13 +15,13 @@ export interface CaseModalData {
   title: string;
   author: string;
   description: string;
-  goals: string[];
+  semester: string;
   stack: string;
   teamSize: string;
   upvotes: number;
   downvotes: number;
   comments: Comment[];
-  userVote?: "up" | "down" | null;
+  userVote?: boolean | null;
 }
 
 interface CaseModalProps {
@@ -89,6 +89,8 @@ export const CaseModal = ({
     }
   };
 
+  console.log(data);
+
   return (
     <AnimatePresence>
       {isOpen && data && (
@@ -110,8 +112,6 @@ export const CaseModal = ({
             <div className={styles.header}>
               <h2 className={styles.headerTitle}>{data.title}</h2>
               <Button
-                variant="ghost"
-                size="icon"
                 className={styles.closeBtn}
                 onClick={onClose}
                 aria-label="Закрыть"
@@ -133,14 +133,8 @@ export const CaseModal = ({
                 </section>
 
                 <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Цели проекта</h3>
-                  <ul className={styles.goalsList}>
-                    {data.goals.map((goal, idx) => (
-                      <li key={idx} className={styles.goalsItem}>
-                        {goal}
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className={styles.sectionTitle}>Семестр</h3>
+                  <p className={styles.text}>{data.semester}</p>
                 </section>
 
                 <section className={styles.section}>
@@ -161,28 +155,29 @@ export const CaseModal = ({
                   <h3 className={styles.votingTitle}>Голосование</h3>
                   <div className={styles.voteButtons}>
                     <Button
-                      variant={data.userVote === "up" ? "default" : "outline"}
-                      className={`${styles.voteBtn} ${
-                        data.userVote === "up" ? styles.votedUp : ""
-                      }`}
+                      variant="ghost"
+                      size="sm"
+                      className={`${styles.actionBtn} ${
+                        data.userVote === true ? styles.activeUp : ""
+                      } hover:bg-transparent`}
                       onClick={handleVoteUp}
-                      title="Поддержать"
+                      title="Поддержать кейс"
                     >
-                      <ThumbsUp className="w-4 h-4" />
+                      <ThumbsUp className="w-4 h-4 mr-2" />
+                      <span>{data.upvotes}</span>
                     </Button>
                     <Button
-                      variant={data.userVote === "down" ? "default" : "outline"}
-                      className={`${styles.voteBtn} ${
-                        data.userVote === "down" ? styles.votedDown : ""
-                      }`}
+                      variant="ghost"
+                      size="sm"
+                      className={`${styles.actionBtn} ${
+                        data.userVote === false ? styles.activeDown : ""
+                      } hover:bg-transparent`}
                       onClick={handleVoteDown}
-                      title="Не поддержать"
+                      title="Не поддержать кейс"
                     >
-                      <ThumbsDown className="w-4 h-4" />
+                      <ThumbsDown className="w-4 h-4 mr-2" />
+                      <span>{data.downvotes}</span>
                     </Button>
-                  </div>
-                  <div className={styles.voteStats}>
-                    За: {data.upvotes} • Против: {data.downvotes}
                   </div>
                 </div>
 

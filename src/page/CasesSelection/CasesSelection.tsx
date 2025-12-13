@@ -1,6 +1,15 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { projectsApi } from "../../api";
+import {
+  useProjects,
+  useProjectById,
+  useProjectComments,
+  useVoteProject,
+  useAddComment,
+} from "../../api/hooks/useProjects";
+import { NotificationContainer } from "../../components/Notification";
+import { useNotifications } from "../../hooks/useNotifications";
 import {
   CasesFeed,
   CaseModal,
@@ -15,179 +24,161 @@ import styles from "./CasesSelection.module.css";
  * Отображает ленту с доступными кейсами для выбора команд
  */
 export const CasesSelection = () => {
-  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+  const [selectedCaseId, setSelectedCaseId] = useState<number | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [userVotes, setUserVotes] = useState<
-    Record<string, "up" | "down" | null>
+    Record<number, "up" | "down" | null>
   >({});
+  const [selectedModalData, setSelectedModalData] = useState<
+    CaseModalData | undefined
+  >();
 
-  const cases: CaseCardData[] = useMemo(
-    () => [
-      {
-        id: "1",
-        title: "Система аналитики транзакций",
-        author: "Иван Петров",
-        authorInitials: "ИП",
-        description:
-          "Разработка системы real-time аналитики банковских транзакций с визуализацией данных и выявлением аномалий. Проект включает создание дашборда для мониторинга...",
-        stack: "React, TypeScript, Spring Boot, PostgreSQL, Docker",
-        upvotes: 12,
-        downvotes: 2,
-        comments: 8,
-        userVote: userVotes["1"] || null,
-      },
-      {
-        id: "2",
-        title: "Мобильное приложение для инвестиций",
-        author: "Анна Смирнова",
-        authorInitials: "АС",
-        description:
-          "Создание кросс-платформенного мобильного приложения для частных инвестиций с интеграцией торговых API и системой рекомендаций на основе ML...",
-        stack: "React Native, Node.js, MongoDB, TensorFlow",
-        upvotes: 9,
-        downvotes: 1,
-        comments: 5,
-        userVote: userVotes["2"] || null,
-      },
-      {
-        id: "3",
-        title: "API Gateway для микросервисов",
-        author: "Дмитрий Козлов",
-        authorInitials: "ДК",
-        description:
-          "Разработка централизованного API Gateway для управления микросервисной архитектурой с функциями аутентификации, rate limiting и мониторинга...",
-        stack: "Go, Redis, Kubernetes, gRPC",
-        upvotes: 15,
-        downvotes: 0,
-        comments: 12,
-        userVote: userVotes["3"] || null,
-      },
-    ],
-    [userVotes]
-  );
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
 
-  const caseModalDataMap = useMemo(
-    (): Record<string, CaseModalData> => ({
-      "1": {
-        id: "1",
-        title: "Система аналитики транзакций",
-        author: "Иван Петров",
-        description:
-          "Разработка системы real-time аналитики банковских транзакций с визуализацией данных и выявлением аномалий. Проект включает создание дашборда для мониторинга финансовых операций в режиме реального времени, настройку алертинга при обнаружении подозрительной активности и интеграцию с существующими банковскими системами.",
-        goals: [
-          "Создать систему мониторинга транзакций с задержкой не более 100мс",
-          "Реализовать алгоритмы выявления аномалий с точностью 95%+",
-          "Разработать интуитивный дашборд для аналитиков",
-          "Обеспечить масштабируемость до 10000 транзакций/сек",
-        ],
-        stack:
-          "React, TypeScript, Spring Boot, PostgreSQL, Docker, Kafka, Redis",
-        teamSize: "4-5 человек",
-        upvotes: 12,
-        downvotes: 2,
-        comments: [
-          {
-            id: "c1",
-            author: "Виктор Соколов",
-            text: "Интересный проект! Хотим присоединиться к команде.",
-          },
-          {
-            id: "c2",
-            author: "Мария Петрова",
-            text: "Какой опыт требуется? Я работала с React и Spring.",
-          },
-        ],
-        userVote: userVotes["1"] || null,
-      },
-      "2": {
-        id: "2",
-        title: "Мобильное приложение для инвестиций",
-        author: "Анна Смирнова",
-        description:
-          "Создание кросс-платформенного мобильного приложения для частных инвестиций с интеграцией торговых API и системой рекомендаций на основе ML.",
-        goals: [
-          "Разработать мобильное приложение на React Native",
-          "Интегрировать торговые API основных бирж",
-          "Реализовать ML-систему рекомендаций",
-          "Обеспечить высокий уровень безопасности финансовых данных",
-        ],
-        stack: "React Native, Node.js, MongoDB, TensorFlow, Firebase",
-        teamSize: "3-4 человека",
-        upvotes: 9,
-        downvotes: 1,
-        comments: [{ id: "c1", author: "Сергей", text: "Отличная идея!" }],
-        userVote: userVotes["2"] || null,
-      },
-      "3": {
-        id: "3",
-        title: "API Gateway для микросервисов",
-        author: "Дмитрий Козлов",
-        description:
-          "Разработка централизованного API Gateway для управления микросервисной архитектурой с функциями аутентификации, rate limiting и мониторинга.",
-        goals: [
-          "Разработать высокопроизводительный API Gateway",
-          "Реализовать систему аутентификации и авторизации",
-          "Создать систему rate limiting и load balancing",
-          "Обеспечить мониторинг и логирование всех запросов",
-        ],
-        stack: "Go, Redis, Kubernetes, gRPC, Docker",
-        teamSize: "5-6 человек",
-        upvotes: 15,
-        downvotes: 0,
-        comments: [
-          {
-            id: "c1",
-            author: "Иван",
-            text: "Этот проект очень нам нужен!",
-          },
-          {
-            id: "c2",
-            author: "Алексей",
-            text: "Требуется опыт с Kubernetes?",
-          },
-          {
-            id: "c3",
-            author: "Дмитрий",
-            text: "Да, желателен опыт работы с K8s",
-          },
-        ],
-        userVote: userVotes["3"] || null,
-      },
-    }),
-    [userVotes]
-  );
+  // Загрузка списка проектов
+  const { data: projects = [] } = useProjects({
+    page: 0,
+    size: 50,
+  });
+
+  // Загрузка деталей выбранного проекта
+  const { data: projectDetails } = useProjectById(selectedCaseId ?? 0);
+
+  // Загрузка комментариев к выбранному проекту
+  const { data: comments = [] } = useProjectComments(selectedCaseId ?? 0, {
+    page: 0,
+    size: 50,
+  });
+
+  // Мутации для голосования и комментариев
+  const voteProjectMutation = useVoteProject();
+  const addCommentMutation = useAddComment();
+
+  // Обновление данных модалки при загрузке деталей проекта
+  useEffect(() => {
+    if (projectDetails) {
+      setSelectedModalData({
+        id: String(projectDetails.id),
+        title: projectDetails.title,
+        author: projectDetails.creatorFio,
+        description: projectDetails.description,
+        semester: projectDetails.semesterName,
+        stack: projectDetails.techStack,
+        teamSize: "не указано",
+        upvotes: projectDetails.likesCount,
+        downvotes: projectDetails.dislikesCount,
+        comments: comments.map((comment) => ({
+          id: String(comment.id),
+          author: comment.authorName,
+          text: comment.body,
+        })),
+        userVote: projectDetails.userVote ?? null,
+      });
+    }
+  }, [projectDetails, comments]);
+
+  // Преобразование данных проектов в формат карточек
+  const cases: CaseCardData[] = projects.map((project) => {
+    // Получаем инициалы из деталей проекта, если они загружены
+    let author = "";
+    let authorInitials = "";
+
+    if (selectedCaseId === project.id && projectDetails) {
+      author = projectDetails.creatorFio;
+      // Извлекаем инициалы из полного имени
+      const nameParts = projectDetails.creatorFio.split(" ");
+      authorInitials = nameParts
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+
+    return {
+      id: String(project.id),
+      title: project.title,
+      author,
+      authorInitials,
+      description: project.description,
+      stack: project.techStack,
+      upvotes: project.likes,
+      downvotes: project.dislikes,
+      comments: project.commentsCount,
+      userVote: project.userVote ?? null,
+    };
+  });
 
   // Обработчики
   const handleCaseClick = useCallback((caseId: string) => {
-    setSelectedCaseId(caseId);
-  }, []);
-
-  const handleUpvote = useCallback((caseId: string) => {
-    setUserVotes((prev) => ({
-      ...prev,
-      [caseId]: prev[caseId] === "up" ? null : "up",
-    }));
-  }, []);
-
-  const handleDownvote = useCallback((caseId: string) => {
-    setUserVotes((prev) => ({
-      ...prev,
-      [caseId]: prev[caseId] === "down" ? null : "down",
-    }));
+    const numId = parseInt(caseId, 10);
+    setSelectedCaseId(numId);
   }, []);
 
   const handleVoteUp = useCallback(
-    (caseId: string) => {
-      handleUpvote(caseId);
+    async (caseId: string) => {
+      const numId = parseInt(caseId, 10);
+      const currentVote = userVotes[numId];
+      const newVote = currentVote === "up" ? null : true;
+
+      try {
+        await voteProjectMutation.mutateAsync({ id: numId, value: newVote });
+        setUserVotes((prev) => ({
+          ...prev,
+          [numId]: newVote ? "up" : null,
+        }));
+        // Обновляем selectedModalData если это выбранный случай
+        if (selectedCaseId === numId && selectedModalData) {
+          setSelectedModalData({
+            ...selectedModalData,
+            userVote: newVote,
+          });
+        }
+      } catch (error) {
+        console.error("Ошибка при голосовании:", error);
+        addNotification("Ошибка при голосовании", "error");
+      }
     },
-    [handleUpvote]
+    [
+      userVotes,
+      voteProjectMutation,
+      addNotification,
+      selectedCaseId,
+      selectedModalData,
+    ]
   );
 
   const handleVoteDown = useCallback(
-    (caseId: string) => {
-      handleDownvote(caseId);
+    async (caseId: string) => {
+      const numId = parseInt(caseId, 10);
+      const currentVote = userVotes[numId];
+      const newVote = currentVote === "down" ? null : false;
+
+      try {
+        await voteProjectMutation.mutateAsync({ id: numId, value: newVote });
+        setUserVotes((prev) => ({
+          ...prev,
+          [numId]: newVote !== null ? "down" : null,
+        }));
+        // Обновляем selectedModalData если это выбранный случай
+        if (selectedCaseId === numId && selectedModalData) {
+          setSelectedModalData({
+            ...selectedModalData,
+            userVote: newVote,
+          });
+        }
+      } catch (error) {
+        console.error("Ошибка при голосовании:", error);
+        addNotification("Ошибка при голосовании", "error");
+      }
     },
-    [handleDownvote]
+    [
+      userVotes,
+      voteProjectMutation,
+      addNotification,
+      selectedCaseId,
+      selectedModalData,
+    ]
   );
 
   const handleCreateCase = useCallback(
@@ -205,24 +196,43 @@ export const CasesSelection = () => {
           teamSize: formData.teamSize,
           mentorIds: [], // TODO: Add mentor selection
         });
-        alert(
-          `Кейс "${formData.title}" успешно создан и добавлен в ленту! Размер команды: ${formData.teamSize}`
+        addNotification(
+          `Кейс "${formData.title}" успешно создан и добавлен в ленту!`,
+          "success"
         );
         setIsCreateModalOpen(false);
       } catch (error) {
         console.error("Failed to create project:", error);
-        alert("Не удалось создать кейс. Попробуйте позже.");
+        addNotification("Не удалось создать кейс. Попробуйте позже.", "error");
       }
     },
-    []
+    [addNotification]
   );
 
-  const selectedModalData = selectedCaseId
-    ? caseModalDataMap[selectedCaseId]
-    : undefined;
+  const handleCommentSubmit = useCallback(
+    async (caseId: string, comment: string) => {
+      const numId = parseInt(caseId, 10);
+      try {
+        await addCommentMutation.mutateAsync({
+          id: numId,
+          body: comment,
+        });
+        addNotification("Комментарий успешно добавлен", "success");
+      } catch (error) {
+        console.error("Ошибка при добавлении комментария:", error);
+        addNotification("Ошибка при добавлении комментария", "error");
+      }
+    },
+    [addCommentMutation, addNotification]
+  );
 
   return (
     <div className={styles.casesSelection}>
+      <NotificationContainer
+        notifications={notifications}
+        onClose={removeNotification}
+      />
+
       <div className={styles.container}>
         <header className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>Отбор кейсов</h1>
@@ -237,8 +247,8 @@ export const CasesSelection = () => {
         <CasesFeed
           cases={cases}
           onCaseClick={handleCaseClick}
-          onUpvote={handleUpvote}
-          onDownvote={handleDownvote}
+          onUpvote={handleVoteUp}
+          onDownvote={handleVoteDown}
           onComments={handleCaseClick}
         />
       </div>
@@ -249,6 +259,7 @@ export const CasesSelection = () => {
         onClose={() => setSelectedCaseId(null)}
         onVoteUp={handleVoteUp}
         onVoteDown={handleVoteDown}
+        onCommentSubmit={handleCommentSubmit}
       />
 
       <CreateCaseModal

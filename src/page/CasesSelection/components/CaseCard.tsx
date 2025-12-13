@@ -20,7 +20,7 @@ export interface CaseCardData {
   upvotes: number;
   downvotes: number;
   comments: number;
-  userVote?: "up" | "down" | null;
+  userVote?: boolean | null;
 }
 
 interface CaseCardProps {
@@ -91,7 +91,7 @@ export const CaseCard = ({
           variant="ghost"
           size="sm"
           className={`${styles.actionBtn} ${
-            data.userVote === "up" ? styles.activeUp : ""
+            data.userVote === true ? styles.activeUp : ""
           } hover:bg-transparent`}
           onClick={handleUpvoteClick}
           title="Поддержать кейс"
@@ -103,7 +103,7 @@ export const CaseCard = ({
           variant="ghost"
           size="sm"
           className={`${styles.actionBtn} ${
-            data.userVote === "down" ? styles.activeDown : ""
+            data.userVote === false ? styles.activeDown : ""
           } hover:bg-transparent`}
           onClick={handleDownvoteClick}
           title="Не поддержать кейс"

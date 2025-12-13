@@ -12,11 +12,13 @@ const buttonVariants = cva(
         primary: "bg-blue-500 text-white hover:bg-blue-600",
         outline: "border border-input bg-white hover:bg-gray-50",
         danger: "bg-red-500 text-white hover:bg-red-600",
+        ghost: "hover:bg-gray-100 hover:text-gray-900",
       },
       size: {
         sm: "h-8 px-3 py-1 text-xs",
         md: "h-9 px-4 py-2 text-sm",
         lg: "h-10 px-6 py-2 text-base",
+        icon: "h-9 w-9",
       },
     },
     defaultVariants: {
@@ -46,4 +48,5 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants };
