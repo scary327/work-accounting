@@ -42,6 +42,18 @@ const Semesters = lazy(() =>
   }))
 );
 
+const TeamsList = lazy(() =>
+  import("../../page/Team/TeamsList").then((module) => ({
+    default: module.TeamsList,
+  }))
+);
+
+const StudentsList = lazy(() =>
+  import("../../page/Student/StudentsList").then((module) => ({
+    default: module.StudentsList,
+  }))
+);
+
 export const AuthRoutes: RouteObject[] = [
   {
     path: URLS.LOGIN,
@@ -94,6 +106,18 @@ export const PublicRoutes: RouteObject[] = [
     path: URLS.SEMESTERS,
     element: React.createElement(RequireAuth, {
       children: React.createElement(Semesters),
+    }),
+  },
+  {
+    path: URLS.TEAMS_LIST,
+    element: React.createElement(RequireAuth, {
+      children: React.createElement(TeamsList),
+    }),
+  },
+  {
+    path: URLS.STUDENTS_LIST,
+    element: React.createElement(RequireAuth, {
+      children: React.createElement(StudentsList),
     }),
   },
 ];

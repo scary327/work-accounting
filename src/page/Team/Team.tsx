@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import styles from "./Team.module.css";
@@ -9,29 +9,8 @@ import {
   ProjectHistory,
 } from "./components";
 import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
-
-interface Member {
-  id: string;
-  name: string;
-  role: string;
-  avatar: string;
-}
-
-interface Project {
-  id: string;
-  semester: string;
-  title: string;
-  mentor: string;
-  stack: string[];
-  teamComposition: string[];
-  grade: number;
-  description: string;
-  checkpoints: Array<{
-    name: string;
-    score: number;
-    comment: string;
-  }>;
-}
+import { Team as TeamType, TeamProject } from "../../api/types";
+import { teamsApi } from "../../api/teamsApi";
 
 /**
  * Team page component - информация о команде, её членах и проектах
@@ -39,134 +18,52 @@ interface Project {
  */
 export const Team = () => {
   const { id: teamId } = useParams<{ id: string }>();
-
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+  const [teamData, setTeamData] = useState<TeamType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<TeamProject | null>(
     null
   );
 
-  // Моковые данные для команды
-  const teamData = useMemo(
-    () => ({
-      id: teamId || "alpha", // Позже будет использоваться для загрузки с API
-      name: "Команда Alpha",
-      createdSemester: "Осень 2024",
-      completedProjects: 2,
-      members: [
-        {
-          id: "1",
-          name: "Алексей Иванов",
-          role: "Team Lead",
-          avatar: "АИ",
-        },
-        {
-          id: "2",
-          name: "Мария Петрова",
-          role: "Frontend Developer",
-          avatar: "МП",
-        },
-        {
-          id: "3",
-          name: "Сергей Сидоров",
-          role: "Backend Developer",
-          avatar: "СС",
-        },
-        {
-          id: "4",
-          name: "Елена Козлова",
-          role: "QA Engineer",
-          avatar: "ЕК",
-        },
-      ] as Member[],
-      currentProject: {
-        title: "Система аналитики транзакций",
-        mentor: "Иван Петров",
-        stack: ["React", "TypeScript", "Spring Boot", "PostgreSQL", "Docker"],
-        status: "В работе",
-      },
-      projectHistory: [
-        {
-          id: "proj-1",
-          semester: "Весна 2025",
-          title: "Система управления документами",
-          mentor: "Владимир Попов",
-          stack: ["Vue.js", "Django", "PostgreSQL"],
-          teamComposition: [
-            "Алексей Иванов",
-            "Мария Петрова",
-            "Дмитрий Волков",
-          ],
-          grade: 82,
-          description:
-            "Разработка системы электронного документооборота с возможностью создания, согласования и хранения документов. Проект включает систему прав доступа, версионирование документов и интеграцию с электронной подписью.",
-          checkpoints: [
-            {
-              name: "Планирование и дизайн",
-              score: 85,
-              comment: "Хорошо продумана архитектура системы, точные сроки",
-            },
-            {
-              name: "Разработка MVP",
-              score: 80,
-              comment: "Основной функционал реализован, требует оптимизации",
-            },
-            {
-              name: "Тестирование и финализация",
-              score: 82,
-              comment: "Хорошее покрытие тестами, есть небольшие баги",
-            },
-          ],
-        } as Project,
-        {
-          id: "proj-2",
-          semester: "Осень 2024",
-          title: "Чат-бот для поддержки клиентов",
-          mentor: "Светлана Романова",
-          stack: ["Python", "NLP", "Rasa"],
-          teamComposition: [
-            "Алексей Иванов",
-            "Сергей Сидоров",
-            "Елена Козлова",
-            "Константин Зайцев",
-          ],
-          grade: 91,
-          description:
-            "Разработка интеллектуального чат-бота на базе Rasa для автоматизации ответов на часто задаваемые вопросы. Система способна обучаться на новых диалогах и совершенствовать свои ответы.",
-          checkpoints: [
-            {
-              name: "Разработка базовых моделей NLP",
-              score: 92,
-              comment:
-                "Отличная работа с моделями, высокая точность распознавания",
-            },
-            {
-              name: "Интеграция с системой поддержки",
-              score: 90,
-              comment: "Хорошо интегрирован, требует небольших улучшений",
-            },
-            {
-              name: "Обучение и тестирование",
-              score: 91,
-              comment: "Боту хорошо удаётся обслуживать пользователей",
-            },
-          ],
-        } as Project,
-      ] as Project[],
-    }),
-    [teamId]
-  );
+  useEffect(() => {
+    const fetchTeam = async () => {
+      if (!teamId) return;
+      try {
+        setIsLoading(true);
+        const data = await teamsApi.getTeamDetails(teamId);
+        setTeamData(data);
+      } catch (error) {
+        console.error("Failed to fetch team details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const handleSelectProject = useCallback((projectId: string) => {
-    setSelectedProjectId(projectId);
+    fetchTeam();
+  }, [teamId]);
+
+  const handleSelectProject = useCallback((project: TeamProject) => {
+    setSelectedProject(project);
   }, []);
 
   const handleCloseModal = useCallback(() => {
-    setSelectedProjectId(null);
+    setSelectedProject(null);
   }, []);
 
-  const selectedProject = useMemo(
-    () => teamData.projectHistory.find((p) => p.id === selectedProjectId),
-    [selectedProjectId, teamData.projectHistory]
-  );
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!teamData) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Team not found
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -176,10 +73,15 @@ export const Team = () => {
       transition={{ duration: 0.5 }}
     >
       <div className={styles.container}>
-        <TeamHeader team={teamData} />
+        <TeamHeader
+          team={{
+            name: teamData.name,
+            completedProjects: teamData.projectHistory.length,
+          }}
+        />
 
         <div className={styles.content}>
-          <TeamMembers members={teamData.members} />
+          <TeamMembers members={teamData.participants} />
           <CurrentProject project={teamData.currentProject} />
           <ProjectHistory
             projects={teamData.projectHistory}
@@ -188,24 +90,20 @@ export const Team = () => {
         </div>
 
         <ProjectDetailsModal
-          isOpen={!!selectedProjectId}
+          isOpen={!!selectedProject}
           onClose={handleCloseModal}
           data={
             selectedProject
               ? {
-                  id: selectedProject.id,
+                  id: selectedProject.title,
                   title: selectedProject.title,
-                  mentor: selectedProject.mentor,
+                  mentor: selectedProject.mentors.join(", "),
                   description: selectedProject.description,
-                  stack: selectedProject.stack,
+                  stack: selectedProject.techStack.split(", "),
                   teamName: teamData.name,
-                  teamMembers: selectedProject.teamComposition,
-                  grade: selectedProject.grade,
-                  checkpoints: selectedProject.checkpoints.map((cp) => ({
-                    title: cp.name,
-                    score: cp.score,
-                    comment: cp.comment,
-                  })),
+                  teamMembers: [],
+                  grade: selectedProject.averageGrade,
+                  checkpoints: [],
                   status: "✅ Завершен",
                 }
               : null

@@ -161,3 +161,88 @@ export interface SemesterResponse {
   endsAt: string;
   isActive: boolean;
 }
+
+export interface TeamParticipant {
+  id: number;
+  fio: string;
+}
+
+export interface TeamProject {
+  semesterName: string;
+  title: string;
+  mentors: string[];
+  techStack: string;
+  description: string;
+  averageGrade: number;
+}
+
+export interface Team {
+  id: number;
+  name: string;
+  participants: TeamParticipant[];
+  currentProject: TeamProject | null;
+  projectHistory: TeamProject[];
+}
+
+export interface Student {
+  id: number;
+  fio: string;
+  email: string;
+  about: string;
+  tlgUsername: string;
+  skills: string[];
+  projects: TeamProject[];
+}
+
+export interface CreateParticipantRequest {
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  bio: string;
+  telegram: string;
+}
+
+export interface ParticipantResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  bio: string;
+  telegram: string;
+  createdById: number;
+  createdByName: string;
+}
+
+export interface CreateTeamRequest {
+  name: string;
+  description: string;
+  participantIds: number[];
+}
+
+export interface UpdateTeamRequest {
+  name: string;
+  description: string;
+}
+
+export interface TeamResponse {
+  id: number;
+  name: string;
+  description: string;
+  createdById: number;
+  createdByName: string;
+  createdAt: string;
+  participants: ParticipantResponse[];
+  currentProjectId: number;
+  currentProjectTitle: string;
+  projectHistory: ProjectHistoryItem[];
+}
+
+export interface AssignProjectRequest {
+  projectId: number;
+}
+
+export interface GradeTeamRequest {
+  score: number;
+  feedback: string;
+  comment: string;
+}

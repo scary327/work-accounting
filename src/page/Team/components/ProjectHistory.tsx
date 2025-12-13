@@ -9,18 +9,17 @@ import {
 import styles from "./ProjectHistory.module.css";
 
 interface Project {
-  id: string;
-  semester: string;
+  semesterName: string;
   title: string;
-  mentor: string;
-  stack: string[];
-  teamComposition: string[];
-  grade: number;
+  mentors: string[];
+  techStack: string;
+  description: string;
+  averageGrade: number;
 }
 
 interface ProjectHistoryProps {
   projects: Project[];
-  onSelectProject: (projectId: string) => void;
+  onSelectProject: (project: Project) => void;
 }
 
 /**
@@ -29,8 +28,8 @@ interface ProjectHistoryProps {
 export const ProjectHistory = memo(
   ({ projects, onSelectProject }: ProjectHistoryProps) => {
     const handleCardClick = useCallback(
-      (projectId: string) => {
-        onSelectProject(projectId);
+      (project: Project) => {
+        onSelectProject(project);
       },
       [onSelectProject]
     );
@@ -48,15 +47,15 @@ export const ProjectHistory = memo(
           <div className={styles.grid}>
             {projects.map((project, index) => (
               <motion.div
-                key={project.id}
+                key={`${project.title}-${index}`}
                 className={styles.card}
-                onClick={() => handleCardClick(project.id)}
+                onClick={() => handleCardClick(project)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    handleCardClick(project.id);
+                    handleCardClick(project);
                   }
                 }}
                 initial={{ opacity: 0, y: 20 }}
@@ -65,27 +64,18 @@ export const ProjectHistory = memo(
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className={styles.semester}>{project.semester}</div>
+                <div className={styles.semester}>{project.semesterName}</div>
                 <div className={styles.cardTitle}>{project.title}</div>
-                <div className={styles.mentor}>Наставник: {project.mentor}</div>
-
-                <div className={styles.stack}>
-                  {project.stack.map((tech) => (
-                    <span key={tech} className={styles.stackTag}>
-                      {tech}
-                    </span>
-                  ))}
+                <div className={styles.mentor}>
+                  Наставники: {project.mentors.join(", ")}
                 </div>
 
-                <div className={styles.teamComposition}>
-                  <div className={styles.label}>Состав на тот момент:</div>
-                  <div className={styles.members}>
-                    {project.teamComposition.join(", ")}
-                  </div>
+                <div className={styles.stack}>
+                  <span className={styles.stackTag}>{project.techStack}</span>
                 </div>
 
                 <div className={styles.grade}>
-                  🏆 Итоговая оценка: {project.grade}/100
+                  🏆 Итоговая оценка: {project.averageGrade}
                 </div>
               </motion.div>
             ))}

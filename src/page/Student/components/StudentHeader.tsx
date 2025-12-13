@@ -7,15 +7,9 @@ interface StudentHeaderProps {
   student: {
     name: string;
     avatar: string;
-    email: string;
-    phone: string;
-    github: string;
     projectsCompleted: number;
     averageGrade: number;
-    currentTeam: {
-      id: string;
-      name: string;
-    } | null;
+    currentTeam: string | null;
   };
 }
 
@@ -35,17 +29,10 @@ export const StudentHeader = ({ student }: StudentHeaderProps) => {
           Дашборд
         </Link>
         <span className={styles.breadcrumbSeparator}>→</span>
-        {student.currentTeam && (
-          <>
-            <Link
-              to={`/team/${student.currentTeam.id}`}
-              className={styles.breadcrumbLink}
-            >
-              {student.currentTeam.name}
-            </Link>
-            <span className={styles.breadcrumbSeparator}>→</span>
-          </>
-        )}
+        <Link to="/student" className={styles.breadcrumbLink}>
+          Студенты
+        </Link>
+        <span className={styles.breadcrumbSeparator}>→</span>
         <span className={styles.breadcrumbCurrent}>{student.name}</span>
       </div>
 

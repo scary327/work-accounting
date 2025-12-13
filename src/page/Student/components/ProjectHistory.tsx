@@ -2,21 +2,10 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { History, BookOpen } from "lucide-react";
 import styles from "./ProjectHistory.module.css";
-import { ProjectCard } from "./ProjectCard";
-
-interface Project {
-  id: string;
-  semester: string;
-  title: string;
-  mentor: string;
-  teamName: string;
-  teamId: string;
-  stack: string[];
-  grade: number;
-}
+import { ProjectHistoryItem } from "../../../api/types";
 
 interface ProjectHistoryProps {
-  projects: Project[];
+  projects: ProjectHistoryItem[];
   onSelectProject: (projectId: string) => void;
 }
 
@@ -28,7 +17,10 @@ export const ProjectHistory = ({
   onSelectProject,
 }: ProjectHistoryProps) => {
   const sortedProjects = useMemo(
-    () => [...projects].sort((a, b) => b.semester.localeCompare(a.semester)),
+    () =>
+      [...projects].sort((a, b) =>
+        b.semesterName.localeCompare(a.semesterName)
+      ),
     [projects]
   );
 
@@ -62,11 +54,21 @@ export const ProjectHistory = ({
           animate="show"
         >
           {sortedProjects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onClick={() => onSelectProject(project.id)}
-            />
+            <motion.div
+              key={project.projectId}
+              className={styles.card}
+              onClick={() => onSelectProject(project.projectId.toString())}
+              whileHover={{ y: -5 }}
+            >
+              <div className={styles.semester}>{project.semesterName}</div>
+              <div className={styles.projectTitle}>{project.projectTitle}</div>
+              <div className={styles.dates}>
+                {new Date(project.assignedAt).toLocaleDateString()} -{" "}
+                {project.unassignedAt
+                  ? new Date(project.unassignedAt).toLocaleDateString()
+                  : "..."}
+              </div>
+            </motion.div>
           ))}
         </motion.div>
       ) : (

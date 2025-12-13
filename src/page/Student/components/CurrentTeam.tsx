@@ -11,11 +11,8 @@ import { Badge } from "../../../components/ui/badge";
 import styles from "./CurrentTeam.module.css";
 
 interface CurrentTeamProps {
-  currentTeam: {
-    id: string;
-    name: string;
-    currentProject: string;
-  } | null;
+  currentTeam: string | null;
+  currentProject: string | null;
   stats: {
     projectsCompleted: number;
     averageGrade: number;
@@ -26,7 +23,11 @@ interface CurrentTeamProps {
 /**
  * CurrentTeam component - текущая команда студента и статистика
  */
-export const CurrentTeam = ({ currentTeam, stats }: CurrentTeamProps) => {
+export const CurrentTeam = ({
+  currentTeam,
+  currentProject,
+  stats,
+}: CurrentTeamProps) => {
   return (
     <motion.div
       className={styles.section}
@@ -46,16 +47,10 @@ export const CurrentTeam = ({ currentTeam, stats }: CurrentTeamProps) => {
               <Badge className={`${styles.teamBadge} absolute top-6 right-6`}>
                 Активна
               </Badge>
-              <div className={styles.teamName}>
-                <Link
-                  to={`/team/${currentTeam.id}`}
-                  className={styles.teamLink}
-                >
-                  {currentTeam.name}
-                </Link>
-              </div>
+              <div className={styles.teamName}>{currentTeam}</div>
               <div className={styles.teamProject}>
-                <strong>Текущий проект:</strong> {currentTeam.currentProject}
+                <strong>Текущий проект:</strong>{" "}
+                {currentProject || "Нет активного проекта"}
               </div>
             </CardContent>
           </Card>

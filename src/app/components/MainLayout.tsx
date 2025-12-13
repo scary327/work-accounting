@@ -11,6 +11,8 @@ export const MainLayout = () => {
     logo: "Проектный Практикум",
     navigationLinks: [
       { id: "dashboard", label: "Дашборд", href: URLS.DASHBOARD },
+      { id: "teams", label: "Команды", href: URLS.TEAMS_LIST },
+      { id: "students", label: "Студенты", href: URLS.STUDENTS_LIST },
       { id: "cases", label: "Отбор кейсов", href: URLS.CASES_SELECTION },
       { id: "archive", label: "Архив", href: URLS.ARCHIVE },
       { id: "semesters", label: "Семестры", href: URLS.SEMESTERS },

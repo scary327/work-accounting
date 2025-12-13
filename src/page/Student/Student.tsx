@@ -5,42 +5,7 @@ import { StudentHeader, CurrentTeam, ProjectHistory } from "./components";
 import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
 import { studentApi } from "../../api";
 import styles from "./Student.module.css";
-
-interface Project {
-  id: string;
-  semester: string;
-  title: string;
-  mentor: string;
-  teamName: string;
-  teamId: string;
-  stack: string[];
-  grade: number;
-  description: string;
-  checkpoints: Array<{
-    name: string;
-    score: number;
-    comment: string;
-  }>;
-  teamComposition: string[];
-}
-
-interface StudentData {
-  id: string;
-  name: string;
-  avatar: string;
-  email: string;
-  phone: string;
-  github: string;
-  projectsCompleted: number;
-  averageGrade: number;
-  teamsCount: number;
-  currentTeam: {
-    id: string;
-    name: string;
-    currentProject: string;
-  } | null;
-  projects: Project[];
-}
+import { StudentDetailsResponse } from "../../api/types";
 
 /**
  * Student page component - профиль студента с его командами и проектами
@@ -48,7 +13,9 @@ interface StudentData {
  */
 export const Student = () => {
   const { id: studentId } = useParams<{ id: string }>();
-  const [studentData, setStudentData] = useState<StudentData | null>(null);
+  const [studentData, setStudentData] = useState<StudentDetailsResponse | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,51 +32,7 @@ export const Student = () => {
 
       try {
         const data = await studentApi.getStudentDetails(studentId);
-
-        // Helper to get initials
-        const getInitials = (name: string) => {
-          return name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
-        };
-
-        const mappedData: StudentData = {
-          id: data.id.toString(),
-          name: data.fullname,
-          avatar: getInitials(data.fullname),
-          email: "Нет данных", // Missing in API
-          phone: "Нет данных", // Missing in API
-          github: "Нет данных", // Missing in API
-          projectsCompleted: data.completedProjectsCount,
-          averageGrade: data.averageGrade,
-          teamsCount: data.teamsCount,
-          currentTeam: data.currentTeam
-            ? {
-                id: "unknown", // Missing in API
-                name: data.currentTeam,
-                currentProject:
-                  data.currentProject?.projectTitle || "Нет активного проекта",
-              }
-            : null,
-          projects: data.projectHistory.map((p) => ({
-            id: p.projectId.toString(),
-            semester: p.semesterName,
-            title: p.projectTitle,
-            mentor: "Нет данных", // Missing in API
-            teamName: "Нет данных", // Missing in API
-            teamId: "unknown", // Missing in API
-            stack: [], // Missing in API
-            grade: 0, // Missing in API
-            description: "Нет описания", // Missing in API
-            checkpoints: [], // Missing in API
-            teamComposition: [], // Missing in API
-          })),
-        };
-
-        setStudentData(mappedData);
+        setStudentData(data);
       } catch (err) {
         console.error("Failed to fetch student details:", err);
         setError("Не удалось загрузить данные студента");
@@ -130,7 +53,10 @@ export const Student = () => {
   }, []);
 
   const selectedProject = useMemo(
-    () => studentData?.projects.find((p) => p.id === selectedProjectId),
+    () =>
+      studentData?.projectHistory.find(
+        (p) => p.projectId.toString() === selectedProjectId
+      ),
     [selectedProjectId, studentData]
   );
 
@@ -160,19 +86,28 @@ export const Student = () => {
       transition={{ duration: 0.5 }}
     >
       <div className={styles.container}>
-        <StudentHeader student={studentData} />
+        <StudentHeader
+          student={{
+            name: studentData.fullname,
+            avatar: "",
+            projectsCompleted: studentData.completedProjectsCount,
+            averageGrade: studentData.averageGrade,
+            currentTeam: studentData.currentTeam,
+          }}
+        />
 
         <div className="flex flex-col gap-6">
           <CurrentTeam
             currentTeam={studentData.currentTeam}
+            currentProject={studentData.currentProject?.projectTitle || null}
             stats={{
-              projectsCompleted: studentData.projectsCompleted,
+              projectsCompleted: studentData.completedProjectsCount,
               averageGrade: studentData.averageGrade,
               teamsCount: studentData.teamsCount,
             }}
           />
           <ProjectHistory
-            projects={studentData.projects}
+            projects={studentData.projectHistory}
             onSelectProject={handleSelectProject}
           />
         </div>
@@ -183,21 +118,16 @@ export const Student = () => {
           data={
             selectedProject
               ? {
-                  id: selectedProject.id,
-                  title: selectedProject.title,
-                  mentor: selectedProject.mentor,
-                  description: selectedProject.description,
-                  stack: selectedProject.stack,
-                  teamName: selectedProject.teamName,
-                  teamId: selectedProject.teamId,
-                  teamMembers: selectedProject.teamComposition,
-                  grade: selectedProject.grade,
-                  checkpoints: selectedProject.checkpoints.map((cp) => ({
-                    title: cp.name,
-                    score: cp.score,
-                    comment: cp.comment,
-                  })),
-                  status: "✅ Завершен",
+                  id: selectedProject.projectId.toString(),
+                  title: selectedProject.projectTitle,
+                  mentor: "",
+                  description: "",
+                  stack: [],
+                  teamName: "",
+                  teamMembers: [],
+                  grade: 0,
+                  checkpoints: [],
+                  status: selectedProject.isActive ? "В работе" : "Завершен",
                 }
               : null
           }

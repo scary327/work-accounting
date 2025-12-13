@@ -9,10 +9,8 @@ import {
 import styles from "./TeamMembers.module.css";
 
 interface Member {
-  id: string;
-  name: string;
-  role: string;
-  avatar: string;
+  id: number;
+  fio: string;
 }
 
 interface TeamMembersProps {
@@ -20,9 +18,18 @@ interface TeamMembersProps {
 }
 
 /**
- * TeamMembers component - сетка членов команды с аватарами и ролями
+ * TeamMembers component - сетка членов команды с аватарами
  */
 export const TeamMembers = memo(({ members }: TeamMembersProps) => {
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <Card className={styles.section}>
       <CardHeader className="pb-2">
@@ -47,10 +54,9 @@ export const TeamMembers = memo(({ members }: TeamMembersProps) => {
               <div
                 className={`${styles.avatar} ${styles[`avatar-${member.id}`]}`}
               >
-                {member.avatar}
+                {getInitials(member.fio)}
               </div>
-              <div className={styles.name}>{member.name}</div>
-              <div className={styles.role}>{member.role}</div>
+              <div className={styles.name}>{member.fio}</div>
             </motion.div>
           ))}
         </div>

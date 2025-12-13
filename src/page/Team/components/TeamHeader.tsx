@@ -6,7 +6,6 @@ import styles from "./TeamHeader.module.css";
 interface TeamHeaderProps {
   team: {
     name: string;
-    createdSemester: string;
     completedProjects: number;
   };
 }
@@ -27,14 +26,17 @@ export const TeamHeader = memo(({ team }: TeamHeaderProps) => {
           Дашборд
         </Link>
         <span className={styles.separator}>→</span>
+        <Link to="/team" className={styles.link}>
+          Команды
+        </Link>
+        <span className={styles.separator}>→</span>
         <span className={styles.current}>{team.name}</span>
       </div>
 
       <h1 className={styles.title}>{team.name}</h1>
 
       <div className={styles.meta}>
-        Создана: {team.createdSemester} • Завершено проектов:{" "}
-        {team.completedProjects}
+        Завершено проектов: {team.completedProjects}
       </div>
     </motion.div>
   );
