@@ -24,8 +24,11 @@ export const SearchBar = ({
       placeholder="Поиск по названию кейса, наставнику или стеку..."
       filterOptions={[
         { value: "all", label: "Все кейсы" },
-        { value: "accepted", label: "Принятые" },
-        { value: "rejected", label: "Отклонённые" },
+        { value: "APPROVED", label: "Принятые" },
+        { value: "ARCHIVED_COMPLETED", label: "Завершенные" },
+        { value: "ARCHIVED_CANCELED", label: "Отмененные" },
+        { value: "IN_PROGRESS", label: "В процессе" },
+        { value: "VOTING", label: "Голосование" },
       ]}
       onSearchChange={onSearchChange}
       onFilterChange={onFilterChange}

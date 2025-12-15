@@ -6,7 +6,7 @@ export interface ArchiveCardData {
   title: string;
   author: string;
   stack: string;
-  status: "accepted" | "rejected";
+  status: "completed" | "canceled" | "voting" | "approved" | "in_progress";
   grade?: number;
   teamName?: string;
   teamMembers?: string[];
@@ -35,6 +35,14 @@ interface ArchiveCardProps {
   onNominate?: (cardTitle: string) => void;
 }
 
+const statusConfig = {
+  completed: { icon: "✅", label: "Завершен" },
+  canceled: { icon: "❌", label: "Отменен" },
+  voting: { icon: "🗳️", label: "Голосование" },
+  approved: { icon: "👍", label: "Одобрен" },
+  in_progress: { icon: "🚧", label: "В работе" },
+};
+
 /**
  * ArchiveCard component - карточка для страницы архива
  */
@@ -43,10 +51,11 @@ export const ArchiveCard = ({
   onViewDetails,
   onNominate,
 }: ArchiveCardProps) => {
-  const isAccepted = card.status === "accepted";
+  const isCompleted = card.status === "completed";
+  const { icon, label } = statusConfig[card.status];
 
   const handleCardClick = () => {
-    if (isAccepted) {
+    if (isCompleted) {
       onViewDetails?.(card.id);
     }
   };
@@ -62,7 +71,9 @@ export const ArchiveCard = ({
       onClick={handleCardClick}
     >
       {/* Status */}
-      <div className={styles.status}>{isAccepted ? "✅" : "❌"}</div>
+      <div className={styles.status} title={label}>
+        {icon}
+      </div>
 
       {/* Title */}
       <h3 className={styles.title}>{card.title}</h3>
@@ -74,7 +85,7 @@ export const ArchiveCard = ({
       <div className={styles.stack}>{card.stack}</div>
 
       {/* Team Info */}
-      {isAccepted && card.teamName && (
+      {(isCompleted || card.status === "in_progress") && card.teamName && (
         <div className={styles.team}>
           <div className={styles.teamLabel}>{card.teamName}</div>
           <div className={styles.teamMembers}>
@@ -84,7 +95,7 @@ export const ArchiveCard = ({
       )}
 
       {/* Grade */}
-      {isAccepted && card.grade !== undefined && (
+      {isCompleted && card.grade !== undefined && (
         <div className={styles.grade}>
           <span className={styles.gradeScore}>{card.grade}/100</span>
           <span className={styles.gradeLabel}>
@@ -97,8 +108,8 @@ export const ArchiveCard = ({
         </div>
       )}
 
-      {/* Button for rejected cases */}
-      {!isAccepted && (
+      {/* Button for canceled cases */}
+      {card.status === "canceled" && (
         <Button
           variant="outline"
           size="sm"

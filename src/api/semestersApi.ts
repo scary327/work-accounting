@@ -3,11 +3,27 @@ import type {
   CreateSemesterRequest,
   SemesterResponse,
   SemesterDetailsResponse,
+  GetSemestersDetailsRequest,
+  PaginatedResponse,
 } from "./types";
 
 export const semestersApi = {
   getSemesters: async (): Promise<SemesterResponse[]> => {
     const response = await apiClient.get<SemesterResponse[]>("/semesters");
+    return response.data;
+  },
+
+  getSemestersDetails: async (
+    params?: GetSemestersDetailsRequest
+  ): Promise<PaginatedResponse<SemesterDetailsResponse>> => {
+    const response = await apiClient.get<
+      PaginatedResponse<SemesterDetailsResponse>
+    >("/semesters/details", {
+      params: {
+        ...params,
+        statuses: params?.statuses?.join(","),
+      },
+    });
     return response.data;
   },
 

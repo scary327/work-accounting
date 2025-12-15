@@ -15,17 +15,36 @@
   transform: translateY(-2px);
 }
 
-.accepted {
+.completed {
   border-left: 4px solid #16a34a;
 }
 
-.rejected {
+.canceled {
   border-left: 4px solid #dc2626;
   cursor: default;
 }
 
-.rejected:hover {
+.voting {
+  border-left: 4px solid #9333ea;
+  cursor: default;
+}
+
+.approved {
+  border-left: 4px solid #2563eb;
+  cursor: default;
+}
+
+.in_progress {
+  border-left: 4px solid #f59e0b;
+  cursor: default;
+}
+
+.canceled:hover,
+.voting:hover,
+.approved:hover,
+.in_progress:hover {
   transform: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .status {

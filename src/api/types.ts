@@ -285,3 +285,11 @@ export interface SemesterDetailsResponse {
 export interface MoveProjectRequest {
   semesterId: number;
 }
+
+export interface GetSemestersDetailsRequest {
+  query?: string;
+  statuses?: string[];
+  page?: number;
+  size?: number;
+  sort?: string[];
+}
