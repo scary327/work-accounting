@@ -167,21 +167,32 @@ export interface TeamParticipant {
   fio: string;
 }
 
-export interface TeamProject {
+export interface TeamProjectDetails {
+  semesterId: number;
   semesterName: string;
+  projectId: number;
   title: string;
-  mentors: string[];
+  mentors: TeamParticipant[];
   techStack: string;
   description: string;
   averageGrade: number;
+  isActive: boolean;
+  assignedAt: string;
+  unassignedAt: string | null;
 }
 
 export interface Team {
   id: number;
   name: string;
   participants: TeamParticipant[];
-  currentProject: TeamProject | null;
-  projectHistory: TeamProject[];
+  currentProject: TeamProjectDetails | null;
+  projectHistory: TeamProjectDetails[];
+}
+
+export interface GetTeamsRequest {
+  page?: number;
+  size?: number;
+  sort?: string[];
 }
 
 export interface Student {
@@ -191,7 +202,7 @@ export interface Student {
   about: string;
   tlgUsername: string;
   skills: string[];
-  projects: TeamProject[];
+  projects: TeamProjectDetails[];
 }
 
 export interface CreateParticipantRequest {

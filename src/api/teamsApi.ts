@@ -6,9 +6,20 @@ import type {
   TeamResponse,
   AssignProjectRequest,
   GradeTeamRequest,
+  GetTeamsRequest,
+  PaginatedResponse,
 } from "./types";
 
 export const teamsApi = {
+  getTeams: async (
+    params?: GetTeamsRequest
+  ): Promise<PaginatedResponse<Team>> => {
+    const response = await apiClient.get<PaginatedResponse<Team>>("/teams", {
+      params,
+    });
+    return response.data;
+  },
+
   createTeam: async (data: CreateTeamRequest): Promise<TeamResponse> => {
     const response = await apiClient.post<TeamResponse>("/teams", data);
     return response.data;

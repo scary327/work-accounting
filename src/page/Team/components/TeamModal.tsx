@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { Modal } from "../../../components/ui/modal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { CreateTeamRequest, UpdateTeamRequest, Team } from "../../../api/types";
+import type {
+  CreateTeamRequest,
+  UpdateTeamRequest,
+  Team,
+} from "../../../api/types";
 import { teamsApi } from "../../../api/teamsApi";
 
 interface TeamModalProps {
@@ -22,7 +26,6 @@ export const TeamModal = ({
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    participantIds: "", // Comma separated IDs for now
   });
 
   useEffect(() => {
@@ -30,13 +33,11 @@ export const TeamModal = ({
       setFormData({
         name: team.name,
         description: "", // Description is not in the Team interface used for list, might need to fetch or just leave empty
-        participantIds: team.participants.map((p) => p.id).join(", "),
       });
     } else {
       setFormData({
         name: "",
         description: "",
-        participantIds: "",
       });
     }
   }, [team, isOpen]);
@@ -62,10 +63,7 @@ export const TeamModal = ({
         const createData: CreateTeamRequest = {
           name: formData.name,
           description: formData.description,
-          participantIds: formData.participantIds
-            .split(",")
-            .map((id) => parseInt(id.trim()))
-            .filter((id) => !isNaN(id)),
+          participantIds: [],
         };
         await teamsApi.createTeam(createData);
       }
@@ -80,7 +78,7 @@ export const TeamModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white p-6 rounded-lg w-full max-w-md">
+      <div className="bg-white p-6 rounded-lg w-full max-w-md m-[0_auto]">
         <h2 className="text-xl font-bold mb-4">
           {team ? "Редактировать команду" : "Создать команду"}
         </h2>
@@ -106,19 +104,8 @@ export const TeamModal = ({
             />
           </div>
           {!team && (
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                ID участников (через запятую)
-              </label>
-              <Input
-                name="participantIds"
-                value={formData.participantIds}
-                onChange={handleChange}
-                placeholder="101, 102, 103"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                В будущем здесь будет удобный выбор студентов
-              </p>
+            <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
+              Добавление участников в команду происходит на странице студентов
             </div>
           )}
           <div className="flex justify-end gap-2 mt-6">
