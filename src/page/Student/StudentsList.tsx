@@ -24,12 +24,17 @@ const MOCK_STUDENTS: Student[] = [
     skills: ["React", "TypeScript", "Node.js", "PostgreSQL"],
     projects: [
       {
+        semesterId: 1,
         semesterName: "Осень 2024",
+        projectId: 1,
         title: "Система учета",
-        mentors: ["Сидоров С.С."],
+        mentors: [{ id: 1, fio: "Сидоров С.С." }],
         techStack: "React, Node.js",
         description: "Разработка системы",
         averageGrade: 4.5,
+        isActive: true,
+        assignedAt: "2024-09-01",
+        unassignedAt: null,
       },
     ],
   },

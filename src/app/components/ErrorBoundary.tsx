@@ -24,7 +24,7 @@ export const ErrorBoundary = () => {
         <Button
           onClick={() => window.location.reload()}
           className="w-full"
-          variant="default"
+          variant="primary"
         >
           Обновить страницу
         </Button>

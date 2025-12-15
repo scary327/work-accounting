@@ -3,7 +3,6 @@ import { Modal } from "../../../components/ui/modal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import type { Semester } from "../types";
-import styles from "../Semesters.module.css";
 
 interface SemesterModalProps {
   isOpen: boolean;

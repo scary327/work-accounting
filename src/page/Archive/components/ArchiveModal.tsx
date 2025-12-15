@@ -1,13 +1,10 @@
 import {
-  ArchiveModal as OriginalArchiveModal,
-  ModalData,
-} from "./ArchiveModal"; // Keep types if needed, but we are replacing the component
-import {
   ProjectDetailsModal,
-  ProjectDetails,
+  type ProjectDetails,
 } from "../../../components/ProjectDetailsModal/ProjectDetailsModal";
 
-export type { ModalData };
+export type { ModalData } from "./ArchiveCard";
+import type { ModalData } from "./ArchiveCard";
 
 interface ArchiveModalProps {
   isOpen: boolean;

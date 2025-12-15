@@ -16,7 +16,7 @@ export interface ProjectCardData {
   teamMembers?: string[];
 }
 
-interface ProjectCardProps {
+export interface ProjectCardProps {
   card: ProjectCardData;
   onViewDetails?: (cardId: string) => void;
   onNominate?: (cardTitle: string) => void;

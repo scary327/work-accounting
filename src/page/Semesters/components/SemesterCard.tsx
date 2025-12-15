@@ -15,7 +15,6 @@ export const SemesterCard = ({
   semester,
   onEdit,
   onDelete,
-  onActivate,
 }: SemesterCardProps) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("ru-RU", {

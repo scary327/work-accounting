@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { History, BookOpen } from "lucide-react";
 import styles from "./ProjectHistory.module.css";
-import { ProjectHistoryItem } from "../../../api/types";
+import type { ProjectHistoryItem } from "../../../api/types";
 
 interface ProjectHistoryProps {
   projects: ProjectHistoryItem[];

@@ -2,9 +2,20 @@ import React, { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { URLS } from "./urls";
-import { Login, Registration } from "../../page/Auth";
 import { RequireAuth, RequireGuest } from "../components/RequireAuth";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+
+const Login = lazy(() =>
+  import("../../page/Auth/Login").then((module) => ({
+    default: module.Login,
+  }))
+);
+
+const Registration = lazy(() =>
+  import("../../page/Auth/Registration").then((module) => ({
+    default: module.Registration,
+  }))
+);
 
 const Dashboard = lazy(() =>
   import("../../page/Dashboard/Dashboard").then((module) => ({

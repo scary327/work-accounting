@@ -1,6 +1,6 @@
 import { atom } from "@reatom/framework";
 import Cookies from "js-cookie";
-import { User } from "../api/types";
+import type { User } from "../api/types";
 
 const getUserFromCookies = (): User | null => {
   const userStr = Cookies.get("user");

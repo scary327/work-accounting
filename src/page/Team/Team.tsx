@@ -9,7 +9,7 @@ import {
   ProjectHistory,
 } from "./components";
 import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
-import { Team as TeamType, TeamProject } from "../../api/types";
+import type { Team as TeamType, TeamProjectDetails } from "../../api/types";
 import { teamsApi } from "../../api/teamsApi";
 
 /**
@@ -20,9 +20,8 @@ export const Team = () => {
   const { id: teamId } = useParams<{ id: string }>();
   const [teamData, setTeamData] = useState<TeamType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedProject, setSelectedProject] = useState<TeamProject | null>(
-    null
-  );
+  const [selectedProject, setSelectedProject] =
+    useState<TeamProjectDetails | null>(null);
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -41,7 +40,7 @@ export const Team = () => {
     fetchTeam();
   }, [teamId]);
 
-  const handleSelectProject = useCallback((project: TeamProject) => {
+  const handleSelectProject = useCallback((project: TeamProjectDetails) => {
     setSelectedProject(project);
   }, []);
 
@@ -97,7 +96,7 @@ export const Team = () => {
               ? {
                   id: selectedProject.title,
                   title: selectedProject.title,
-                  mentor: selectedProject.mentors.join(", "),
+                  mentor: selectedProject.mentors.map((m) => m.fio).join(", "),
                   description: selectedProject.description,
                   stack: selectedProject.techStack.split(", "),
                   teamName: teamData.name,

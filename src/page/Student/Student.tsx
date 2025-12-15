@@ -5,7 +5,7 @@ import { StudentHeader, CurrentTeam, ProjectHistory } from "./components";
 import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
 import { studentApi } from "../../api";
 import styles from "./Student.module.css";
-import { StudentDetailsResponse } from "../../api/types";
+import type { StudentDetailsResponse } from "../../api/types";
 
 /**
  * Student page component - профиль студента с его командами и проектами
@@ -93,6 +93,9 @@ export const Student = () => {
             projectsCompleted: studentData.completedProjectsCount,
             averageGrade: studentData.averageGrade,
             currentTeam: studentData.currentTeam,
+            email: "student@example.com", // Placeholder
+            phone: "+7 (999) 000-00-00", // Placeholder
+            github: "@student", // Placeholder
           }}
         />
 

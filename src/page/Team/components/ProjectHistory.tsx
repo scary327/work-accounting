@@ -7,19 +7,11 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import styles from "./ProjectHistory.module.css";
-
-interface Project {
-  semesterName: string;
-  title: string;
-  mentors: string[];
-  techStack: string;
-  description: string;
-  averageGrade: number;
-}
+import type { TeamProjectDetails } from "../../../api/types";
 
 interface ProjectHistoryProps {
-  projects: Project[];
-  onSelectProject: (project: Project) => void;
+  projects: TeamProjectDetails[];
+  onSelectProject: (project: TeamProjectDetails) => void;
 }
 
 /**
@@ -28,7 +20,7 @@ interface ProjectHistoryProps {
 export const ProjectHistory = memo(
   ({ projects, onSelectProject }: ProjectHistoryProps) => {
     const handleCardClick = useCallback(
-      (project: Project) => {
+      (project: TeamProjectDetails) => {
         onSelectProject(project);
       },
       [onSelectProject]
@@ -67,7 +59,7 @@ export const ProjectHistory = memo(
                 <div className={styles.semester}>{project.semesterName}</div>
                 <div className={styles.cardTitle}>{project.title}</div>
                 <div className={styles.mentor}>
-                  Наставники: {project.mentors.join(", ")}
+                  Наставники: {project.mentors.map((m) => m.fio).join(", ")}
                 </div>
 
                 <div className={styles.stack}>

@@ -8,11 +8,12 @@ import {
 } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import styles from "./CurrentProject.module.css";
+import type { TeamParticipant } from "../../../api/types";
 
 interface CurrentProjectProps {
   project: {
     title: string;
-    mentors: string[];
+    mentors: TeamParticipant[];
     techStack: string;
   } | null;
 }
@@ -56,7 +57,7 @@ export const CurrentProject = memo(({ project }: CurrentProjectProps) => {
           <Badge className={styles.badge}>В работе</Badge>
           <div className={styles.projectTitle}>{project.title}</div>
           <div className={styles.mentor}>
-            Наставники: {project.mentors.join(", ")}
+            Наставники: {project.mentors.map((m) => m.fio).join(", ")}
           </div>
           <div className={styles.stack}>{project.techStack}</div>
         </motion.div>

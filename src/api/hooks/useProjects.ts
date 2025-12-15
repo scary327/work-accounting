@@ -54,7 +54,7 @@ export const useAddComment = () => {
   return useMutation({
     mutationFn: ({ id, body }: { id: number; body: string }) =>
       projectsApi.addComment(id, body),
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate comments for this project
       queryClient.invalidateQueries({
         queryKey: PROJECT_COMMENTS_QUERY_KEY(variables.id),

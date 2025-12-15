@@ -10,6 +10,9 @@ interface StudentHeaderProps {
     projectsCompleted: number;
     averageGrade: number;
     currentTeam: string | null;
+    email: string;
+    phone: string;
+    github: string;
   };
 }
 
