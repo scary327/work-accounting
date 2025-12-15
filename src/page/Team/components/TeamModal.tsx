@@ -103,11 +103,9 @@ export const TeamModal = ({
               placeholder="Описание команды..."
             />
           </div>
-          {!team && (
-            <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
-              Добавление участников в команду происходит на странице студентов
-            </div>
-          )}
+          <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
+            Добавление участников в команду происходит на странице студентов
+          </div>
           <div className="flex justify-end gap-2 mt-6">
             <Button type="button" variant="ghost" onClick={onClose}>
               Отмена
