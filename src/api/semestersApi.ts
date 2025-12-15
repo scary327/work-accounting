@@ -1,9 +1,20 @@
 import apiClient from "./apiClient";
-import type { CreateSemesterRequest, SemesterResponse } from "./types";
+import type {
+  CreateSemesterRequest,
+  SemesterResponse,
+  SemesterDetailsResponse,
+} from "./types";
 
 export const semestersApi = {
   getSemesters: async (): Promise<SemesterResponse[]> => {
     const response = await apiClient.get<SemesterResponse[]>("/semesters");
+    return response.data;
+  },
+
+  getSemesterDetails: async (id: number): Promise<SemesterDetailsResponse> => {
+    const response = await apiClient.get<SemesterDetailsResponse>(
+      `/semesters/${id}`
+    );
     return response.data;
   },
 

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../../components/ui/button";
-import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { NotificationContainer } from "../../components/Notification";
 import { useNotifications } from "../../hooks/useNotifications";
 import {
@@ -13,13 +12,14 @@ import {
 } from "../../api/hooks/useSemesters";
 import { SemesterCard } from "./components/SemesterCard";
 import { SemesterModal } from "./components/SemesterModal";
+import { DeleteSemesterModal } from "./components/DeleteSemesterModal";
 import type { Semester } from "./types";
 import styles from "./Semesters.module.css";
 
 export const Semesters = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSemester, setEditingSemester] = useState<Semester | null>(null);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [semesterToDelete, setSemesterToDelete] = useState<number | null>(null);
 
   const { notifications, addNotification, removeNotification } =
@@ -57,26 +57,19 @@ export const Semesters = () => {
 
   const handleDelete = (id: number) => {
     setSemesterToDelete(id);
-    setDeleteConfirmOpen(true);
+    setDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (semesterToDelete === null) return;
-
+  const confirmDelete = async (id: number) => {
     try {
-      await deleteMutation.mutateAsync(semesterToDelete);
+      await deleteMutation.mutateAsync(id);
       addNotification("Семестр успешно удалён", "success");
-      setDeleteConfirmOpen(false);
+      setDeleteModalOpen(false);
       setSemesterToDelete(null);
     } catch (error) {
       console.error("Ошибка при удалении семестра:", error);
       addNotification("Ошибка при удалении семестра", "error");
     }
-  };
-
-  const cancelDelete = () => {
-    setDeleteConfirmOpen(false);
-    setSemesterToDelete(null);
   };
 
   const handleActivate = async (id: number) => {
@@ -140,15 +133,11 @@ export const Semesters = () => {
         }
       />
 
-      <ConfirmDialog
-        isOpen={deleteConfirmOpen}
-        title="Удалить семестр?"
-        message="Вы уверены, что хотите удалить этот семестр? Это действие нельзя отменить."
-        confirmText="Удалить"
-        cancelText="Отмена"
-        variant="danger"
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
+      <DeleteSemesterModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        semesterId={semesterToDelete}
+        onDelete={confirmDelete}
       />
     </div>
   );

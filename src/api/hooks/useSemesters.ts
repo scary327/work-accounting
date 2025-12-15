@@ -12,6 +12,14 @@ export const useSemesters = () => {
   });
 };
 
+export const useSemesterDetails = (id: number | null) => {
+  return useQuery({
+    queryKey: [...SEMESTERS_QUERY_KEY, id],
+    queryFn: () => semestersApi.getSemesterDetails(id!),
+    enabled: !!id,
+  });
+};
+
 export const useCreateSemester = () => {
   const queryClient = useQueryClient();
 

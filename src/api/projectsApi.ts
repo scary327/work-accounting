@@ -64,4 +64,15 @@ export const projectsApi = {
     const response = await apiClient.post<ProjectResponse>("/projects", data);
     return response.data;
   },
+
+  deleteProject: async (id: number): Promise<void> => {
+    await apiClient.delete(`/projects/${id}`);
+  },
+
+  moveProjectToSemester: async (
+    id: number,
+    semesterId: number
+  ): Promise<void> => {
+    await apiClient.patch(`/projects/${id}/semester`, { semesterId });
+  },
 };

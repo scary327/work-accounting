@@ -257,3 +257,31 @@ export interface GradeTeamRequest {
   feedback: string;
   comment: string;
 }
+
+export interface SemesterProjectTeam {
+  id: number;
+  name: string;
+  averageRating: number;
+  members: string[];
+}
+
+export interface SemesterProject {
+  id: number;
+  title: string;
+  status: string;
+  techStack: string;
+  curators: string[];
+  teams: SemesterProjectTeam[];
+}
+
+export interface SemesterDetailsResponse {
+  id: number;
+  name: string;
+  projectCount: number;
+  projects: SemesterProject[];
+  isActive: boolean;
+}
+
+export interface MoveProjectRequest {
+  semesterId: number;
+}
