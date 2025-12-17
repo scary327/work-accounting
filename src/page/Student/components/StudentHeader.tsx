@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Phone, Github } from "lucide-react";
+import { Send } from "lucide-react";
 import styles from "./StudentHeader.module.css";
 
 interface StudentHeaderProps {
@@ -10,9 +10,8 @@ interface StudentHeaderProps {
     projectsCompleted: number;
     averageGrade: number;
     currentTeam: string | null;
-    email: string;
-    phone: string;
-    github: string;
+    description: string;
+    telegram?: string;
   };
 }
 
@@ -47,19 +46,18 @@ export const StudentHeader = ({ student }: StudentHeaderProps) => {
             Студент • Участник {student.projectsCompleted} проектов • Средняя
             оценка: {student.averageGrade}/100
           </div>
+          {student.description && (
+            <div className="text-sm text-gray-600 mt-2 mb-2">
+              {student.description}
+            </div>
+          )}
           <div className={styles.contactInfo}>
-            <div className={styles.contactItem}>
-              <Mail className="w-4 h-4 mr-2" />
-              <span>{student.email}</span>
-            </div>
-            <div className={styles.contactItem}>
-              <Phone className="w-4 h-4 mr-2" />
-              <span>{student.phone}</span>
-            </div>
-            <div className={styles.contactItem}>
-              <Github className="w-4 h-4 mr-2" />
-              <span>{student.github}</span>
-            </div>
+            {student.telegram && (
+              <div className={styles.contactItem}>
+                <Send className="w-4 h-4 mr-2" />
+                <span>{student.telegram}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

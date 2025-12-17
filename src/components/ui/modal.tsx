@@ -75,7 +75,7 @@ export const Modal = ({
               damping: 30,
             }}
             className={cn(
-              "relative w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-lg",
+              "relative w-auto max-w-lg overflow-hidden rounded-xl bg-white shadow-lg",
               className
             )}
             onClick={(e) => e.stopPropagation()}

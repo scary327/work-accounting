@@ -79,7 +79,7 @@ export const StudentModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white p-6 rounded-lg w-full max-w-md">
+      <div className="bg-white p-6 rounded-lg w-auto md:min-w-[400px]  max-w-md">
         <h2 className="text-xl font-bold mb-4">
           {student ? "Редактировать студента" : "Создать студента"}
         </h2>

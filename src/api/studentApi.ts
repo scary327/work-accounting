@@ -3,9 +3,20 @@ import type {
   StudentDetailsResponse,
   CreateParticipantRequest,
   ParticipantResponse,
+  GetParticipantsRequest,
+  PaginatedResponse,
 } from "./types";
 
 export const studentApi = {
+  getParticipants: async (
+    params?: GetParticipantsRequest
+  ): Promise<PaginatedResponse<ParticipantResponse>> => {
+    const response = await apiClient.get<
+      PaginatedResponse<ParticipantResponse>
+    >("/participants", { params });
+    return response.data;
+  },
+
   getStudentDetails: async (
     id: string | number
   ): Promise<StudentDetailsResponse> => {
@@ -19,7 +30,7 @@ export const studentApi = {
     data: CreateParticipantRequest
   ): Promise<ParticipantResponse> => {
     const response = await apiClient.post<ParticipantResponse>(
-      "/participant",
+      "/participants",
       data
     );
     return response.data;

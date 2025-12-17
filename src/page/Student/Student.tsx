@@ -93,9 +93,8 @@ export const Student = () => {
             projectsCompleted: studentData.completedProjectsCount,
             averageGrade: studentData.averageGrade,
             currentTeam: studentData.currentTeam,
-            email: "student@example.com", // Placeholder
-            phone: "+7 (999) 000-00-00", // Placeholder
-            github: "@student", // Placeholder
+            description: studentData.bio,
+            telegram: studentData.telegram,
           }}
         />
 

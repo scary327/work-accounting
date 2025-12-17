@@ -69,6 +69,7 @@ export interface StudentDetailsResponse {
   id: number;
   fullname: string;
   bio: string;
+  telegram?: string;
   currentTeam: string;
   currentProject: ProjectHistoryItem | null;
   completedProjectsCount: number;
@@ -289,6 +290,13 @@ export interface MoveProjectRequest {
 export interface GetSemestersDetailsRequest {
   query?: string;
   statuses?: string[];
+  page?: number;
+  size?: number;
+  sort?: string[];
+}
+
+export interface GetParticipantsRequest {
+  query?: string;
   page?: number;
   size?: number;
   sort?: string[];

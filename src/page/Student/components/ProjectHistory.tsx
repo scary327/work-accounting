@@ -73,7 +73,7 @@ export const ProjectHistory = ({
         </motion.div>
       ) : (
         <div className={styles.placeholder}>
-          <BookOpen className="w-12 h-12 text-muted-foreground mb-4" />
+          <BookOpen className="w-12 h-12 text-muted-foreground m-[0_auto_1rem]" />
           <div className={styles.placeholderText}>
             Студент ещё не завершил ни одного проекта
           </div>

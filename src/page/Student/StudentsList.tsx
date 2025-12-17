@@ -1,71 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, User, GraduationCap, Plus, Pencil } from "lucide-react";
-import type { Student, ParticipantResponse } from "../../api/types";
+import { User, Plus, Pencil, UserPlus } from "lucide-react";
+import type { ParticipantResponse, Team } from "../../api/types";
+import { studentApi } from "../../api/studentApi";
+import { teamsApi } from "../../api/teamsApi";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { StudentModal } from "./components/StudentModal";
+import { AddToTeamModal } from "./components/AddToTeamModal";
 import styles from "./StudentsList.module.css";
-
-const MOCK_STUDENTS: Student[] = [
-  {
-    id: 101,
-    fio: "Иванов Иван Иванович",
-    email: "ivanov@example.com",
-    about: "Fullstack разработчик с опытом в React и Node.js",
-    tlgUsername: "@ivanov_dev",
-    skills: ["React", "TypeScript", "Node.js", "PostgreSQL"],
-    projects: [
-      {
-        semesterId: 1,
-        semesterName: "Осень 2024",
-        projectId: 1,
-        title: "Система учета",
-        mentors: [{ id: 1, fio: "Сидоров С.С." }],
-        techStack: "React, Node.js",
-        description: "Разработка системы",
-        averageGrade: 4.5,
-        isActive: true,
-        assignedAt: "2024-09-01",
-        unassignedAt: null,
-      },
-    ],
-  },
-  {
-    id: 102,
-    fio: "Петров Петр Петрович",
-    email: "petrov@example.com",
-    about: "Backend разработчик, люблю Python",
-    tlgUsername: "@petrov_py",
-    skills: ["Python", "Django", "FastAPI", "Docker"],
-    projects: [],
-  },
-  {
-    id: 103,
-    fio: "Смирнова Анна Сергеевна",
-    email: "smirnova@example.com",
-    about: "Frontend разработчик, UI/UX энтузиаст",
-    tlgUsername: "@smirnova_ui",
-    skills: ["Vue.js", "Figma", "CSS Modules", "Tailwind"],
-    projects: [],
-  },
-  {
-    id: 104,
-    fio: "Козлов Дмитрий Андреевич",
-    email: "kozlov@example.com",
-    about: "DevOps инженер",
-    tlgUsername: "@kozlov_ops",
-    skills: ["Linux", "Bash", "CI/CD", "Kubernetes"],
-    projects: [],
-  },
-];
 
 const container = {
   show: {
@@ -82,44 +31,77 @@ const item = {
 
 export const StudentsList = () => {
   const navigate = useNavigate();
-  const [students] = useState<Student[]>(MOCK_STUDENTS);
+  const [students, setStudents] = useState<ParticipantResponse[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] =
     useState<ParticipantResponse | null>(null);
+  
+  const [addToTeamModalOpen, setAddToTeamModalOpen] = useState(false);
+  const [selectedStudentForTeam, setSelectedStudentForTeam] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+
+  const fetchStudents = async () => {
+    try {
+      setIsLoading(true);
+      const response = await studentApi.getParticipants({ size: 100 });
+      setStudents(response.content);
+    } catch (error) {
+      console.error("Failed to fetch students", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchTeams = async () => {
+    try {
+      const response = await teamsApi.getTeams({ size: 100 });
+      setTeams(response.content);
+    } catch (error) {
+      console.error("Failed to fetch teams", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents();
+    fetchTeams();
+  }, []);
 
   const handleCreate = () => {
     setEditingStudent(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (student: Student, e: React.MouseEvent) => {
+  const handleEdit = (student: ParticipantResponse, e: React.MouseEvent) => {
     e.stopPropagation();
-    const [lastName, firstName, middleName] = student.fio.split(" ");
-    const participant: ParticipantResponse = {
-      id: student.id,
-      firstName: firstName || "",
-      lastName: lastName || "",
-      middleName: middleName || "",
-      bio: student.about,
-      telegram: student.tlgUsername,
-      createdById: 0,
-      createdByName: "",
-    };
-    setEditingStudent(participant);
+    setEditingStudent(student);
     setIsModalOpen(true);
   };
 
-  const handleModalSuccess = (savedStudent: ParticipantResponse) => {
-    console.log("Saved student:", savedStudent);
+  const handleAddToTeam = (student: ParticipantResponse, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedStudentForTeam({
+      id: student.id,
+      name: getFio(student),
+    });
+    setAddToTeamModalOpen(true);
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  const handleModalSuccess = () => {
+    fetchStudents();
+    setIsModalOpen(false);
+  };
+
+  const handleAddToTeamSuccess = () => {
+    // Optionally refresh students if team info is displayed
+    fetchStudents();
+  };
+
+  const getFio = (student: ParticipantResponse) => {
+    return `${student.lastName} ${student.firstName} ${student.middleName || ""}`.trim();
   };
 
   return (
@@ -133,93 +115,71 @@ export const StudentsList = () => {
           </Button>
         </div>
 
-        <motion.div
-          className={styles.grid}
-          variants={container}
-          initial="hidden"
-          animate="show"
-        >
-          {students.map((student) => (
-            <motion.div key={student.id} variants={item}>
-              <Card
-                className={`${styles.card} group relative`}
-                onClick={() => navigate(`/student/${student.id}`)}
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                  onClick={(e) => handleEdit(student, e)}
+        {isLoading ? (
+          <div className="flex justify-center p-8">Загрузка...</div>
+        ) : (
+          <motion.div
+            className={styles.grid}
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
+            {students.map((student) => (
+              <motion.div key={student.id} variants={item}>
+                <Card
+                  className={`${styles.card} group relative`}
+                  onClick={() => navigate(`/student/${student.id}`)}
                 >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <CardHeader className={styles.cardHeader}>
-                  <div className={styles.avatarLarge}>
-                    {getInitials(student.fio)}
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleAddToTeam(student, e)}
+                      title="Добавить в команду"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleEdit(student, e)}
+                      title="Редактировать"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <CardTitle className={styles.studentName}>
-                    {student.fio}
-                  </CardTitle>
-                  <div className={styles.studentEmail}>
-                    <Mail size={12} className="inline mr-1" />
-                    {student.email}
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col pt-0">
-                  <div className="mb-4 flex-1">
-                    <div className="flex items-center gap-2 mb-2 text-sm text-gray-500 font-medium">
-                      <User size={16} />
-                      <span>О себе</span>
+                  <CardHeader className={styles.cardHeader}>
+                    <CardTitle className={styles.studentName}>
+                      {getFio(student)}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col pt-0">
+                    <div className="mb-4 flex-1">
+                      <div className="flex items-center gap-2 mb-2 text-sm text-gray-500 font-medium">
+                        <User size={16} />
+                        <span>О себе</span>
+                      </div>
+                      <p className={styles.aboutText}>
+                        {student.bio || "Информация отсутствует"}
+                      </p>
                     </div>
-                    <p className={styles.aboutText}>
-                      {student.about || "Информация отсутствует"}
-                    </p>
-                  </div>
 
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2 text-sm text-gray-500 font-medium">
-                      <GraduationCap size={16} />
-                      <span>Навыки</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {student.skills.slice(0, 5).map((skill, i) => (
-                        <Badge
-                          key={i}
-                          variant="outline"
-                          className="text-xs bg-white"
-                        >
-                          {skill}
-                        </Badge>
-                      ))}
-                      {student.skills.length > 5 && (
-                        <Badge variant="outline" className="text-xs bg-white">
-                          +{student.skills.length - 5}
-                        </Badge>
+                    <div className={styles.statsRow}>
+                      {student.telegram && (
+                        <div className={styles.statItem}>
+                          <div className="text-blue-500 text-sm font-medium truncate max-w-[100px]">
+                            {student.telegram}
+                          </div>
+                          <div className={styles.statLabel}>Telegram</div>
+                        </div>
                       )}
                     </div>
-                  </div>
-
-                  <div className={styles.statsRow}>
-                    <div className={styles.statItem}>
-                      <div className={styles.statValue}>
-                        {student.projects.length}
-                      </div>
-                      <div className={styles.statLabel}>Проектов</div>
-                    </div>
-                    {student.tlgUsername && (
-                      <div className={styles.statItem}>
-                        <div className="text-blue-500 text-sm font-medium truncate max-w-[100px]">
-                          {student.tlgUsername}
-                        </div>
-                        <div className={styles.statLabel}>Telegram</div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
 
       <StudentModal
@@ -227,6 +187,15 @@ export const StudentsList = () => {
         onClose={() => setIsModalOpen(false)}
         student={editingStudent}
         onSuccess={handleModalSuccess}
+      />
+
+      <AddToTeamModal
+        isOpen={addToTeamModalOpen}
+        onClose={() => setAddToTeamModalOpen(false)}
+        studentId={selectedStudentForTeam?.id || null}
+        studentName={selectedStudentForTeam?.name || ""}
+        teams={teams}
+        onSuccess={handleAddToTeamSuccess}
       />
     </div>
   );
