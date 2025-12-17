@@ -55,9 +55,7 @@ export const ArchiveCard = ({
   const { icon, label } = statusConfig[card.status];
 
   const handleCardClick = () => {
-    if (isCompleted) {
-      onViewDetails?.(card.id);
-    }
+    onViewDetails?.(card.id);
   };
 
   const handleNominateClick = (e: React.MouseEvent) => {

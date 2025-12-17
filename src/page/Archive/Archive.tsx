@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { SearchBar, SemesterBlock, type ArchiveCardData } from "./components";
-import { ProjectDetailsModal } from "../../components/ProjectDetailsModal/ProjectDetailsModal";
+import { ProjectInfoModal } from "../../components/ProjectInfoModal/ProjectInfoModal";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
 import { semestersApi } from "../../api/semestersApi";
 import { projectsApi } from "../../api/projectsApi";
+import { useProjectComments } from "../../api/hooks/useProjects";
 import type {
   SemesterDetailsResponse,
   ProjectDetailsResponse,
@@ -83,6 +84,25 @@ export const Archive = () => {
   const handleFilterChange = (value: string) => {
     setParam("statuses", value);
   };
+
+  const { data: comments = [] } = useProjectComments(
+    parseInt(selectedCardId || "0"),
+    {
+      page: 0,
+      size: 50,
+    }
+  );
+
+  const selectedProjectFromList = useMemo(() => {
+    if (!selectedCardId) return null;
+    for (const semester of semestersData) {
+      const project = semester.projects.find(
+        (p) => p.id.toString() === selectedCardId
+      );
+      if (project) return project;
+    }
+    return null;
+  }, [selectedCardId, semestersData]);
 
   // Обработчики
   const handleViewCard = useCallback(async (cardId: string) => {
@@ -183,32 +203,53 @@ export const Archive = () => {
         )}
       </div>
 
-      <ProjectDetailsModal
+      <ProjectInfoModal
         isOpen={selectedCardId !== null}
         onClose={() => {
           setSelectedCardId(null);
           setSelectedProjectDetails(null);
         }}
+        readOnly={true}
         data={
           selectedProjectDetails
             ? {
                 id: selectedProjectDetails.id.toString(),
                 title: selectedProjectDetails.title,
-                mentor: selectedProjectDetails.mentors
+                author: selectedProjectDetails.creatorFio,
+                description: selectedProjectDetails.description,
+                semester: selectedProjectDetails.semesterName,
+                stack: selectedProjectDetails.techStack,
+                upvotes: selectedProjectDetails.likesCount,
+                downvotes: selectedProjectDetails.dislikesCount,
+                comments: comments.map((c) => ({
+                  id: c.id.toString(),
+                  author: c.authorName,
+                  text: c.body,
+                })),
+                status: (() => {
+                  switch (selectedProjectDetails.status) {
+                    case "ARCHIVED_COMPLETED":
+                      return "✅ Завершен";
+                    case "ARCHIVED_CANCELED":
+                      return "❌ Отменен";
+                    case "VOTING":
+                      return "🗳️ Голосование";
+                    case "APPROVED":
+                      return "👍 Одобрен";
+                    case "IN_PROGRESS":
+                      return "🚧 В работе";
+                    default:
+                      return selectedProjectDetails.status;
+                  }
+                })(),
+                mentors: selectedProjectDetails.mentors
                   .map((m) => m.fullName)
                   .join(", "),
-                description: selectedProjectDetails.description,
-                stack: selectedProjectDetails.techStack.split(", "),
-                teamName: "Команда", // Details might need team info
-                teamMembers: [], // Details might need team members
-                grade: 0, // Details might need grade
-                checkpoints: [], // Details might need checkpoints
-                status:
-                  selectedProjectDetails.status === "ARCHIVED_COMPLETED"
-                    ? "✅ Принят"
-                    : "❌ Отклонен",
+                teamName: selectedProjectFromList?.teams[0]?.name,
+                teamMembers: selectedProjectFromList?.teams[0]?.members,
+                grade: selectedProjectFromList?.teams[0]?.averageRating,
               }
-            : null
+            : undefined
         }
       />
     </div>
