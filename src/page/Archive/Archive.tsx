@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import { useAtom } from "@reatom/npm-react";
 import { SearchBar, SemesterBlock, type ArchiveCardData } from "./components";
 import { ProjectInfoModal } from "../../components/ProjectInfoModal/ProjectInfoModal";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
 import { semestersApi } from "../../api/semestersApi";
 import { projectsApi } from "../../api/projectsApi";
-import { useProjectComments } from "../../api/hooks/useProjects";
+import {
+  useProjectComments,
+  useUpdateProjectStatus,
+} from "../../api/hooks/useProjects";
+import { useNotifications } from "../../hooks/useNotifications";
+import { userAtom } from "../../model/user";
 import type {
   SemesterDetailsResponse,
   ProjectDetailsResponse,
@@ -25,6 +31,10 @@ export const Archive = () => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedProjectDetails, setSelectedProjectDetails] =
     useState<ProjectDetailsResponse | null>(null);
+
+  const [user] = useAtom(userAtom);
+  const { addNotification } = useNotifications();
+  const updateStatusMutation = useUpdateProjectStatus();
 
   const searchValue = getParam("query") || "";
   const filterValue = getParam("statuses") || "all";
@@ -121,6 +131,30 @@ export const Archive = () => {
     );
   }, []);
 
+  const handleStatusChange = useCallback(
+    async (caseId: string, status: string) => {
+      const numId = parseInt(caseId, 10);
+      try {
+        await updateStatusMutation.mutateAsync({ id: numId, status });
+        addNotification("Статус проекта обновлен", "success");
+        if (selectedProjectDetails) {
+          setSelectedProjectDetails({ ...selectedProjectDetails, status });
+        }
+        // Refresh list
+        fetchSemesters();
+      } catch (error) {
+        console.error("Failed to update status:", error);
+        addNotification("Не удалось обновить статус", "error");
+      }
+    },
+    [
+      updateStatusMutation,
+      addNotification,
+      selectedProjectDetails,
+      fetchSemesters,
+    ]
+  );
+
   return (
     <div className={styles.archive}>
       <div className={styles.container}>
@@ -210,6 +244,12 @@ export const Archive = () => {
           setSelectedProjectDetails(null);
         }}
         readOnly={true}
+        isOwner={
+          !!user &&
+          !!selectedProjectDetails &&
+          String(user.id) === String(selectedProjectDetails.creatorId)
+        }
+        onStatusChange={handleStatusChange}
         data={
           selectedProjectDetails
             ? {
@@ -226,6 +266,7 @@ export const Archive = () => {
                   author: c.authorName,
                   text: c.body,
                 })),
+                rawStatus: selectedProjectDetails.status,
                 status: (() => {
                   switch (selectedProjectDetails.status) {
                     case "ARCHIVED_COMPLETED":

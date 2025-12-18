@@ -2,6 +2,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, ThumbsUp, ThumbsDown, Send } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import styles from "./ProjectInfoModal.module.css";
 
 export interface Comment {
@@ -24,6 +31,7 @@ export interface ProjectInfoModalData {
   userVote?: boolean | null;
   // Extra fields for Archive
   status?: string;
+  rawStatus?: string;
   mentors?: string;
   teamName?: string;
   teamMembers?: string[];
@@ -37,7 +45,9 @@ interface ProjectInfoModalProps {
   onVoteUp?: (caseId: string) => void;
   onVoteDown?: (caseId: string) => void;
   onCommentSubmit?: (caseId: string, comment: string) => void;
+  onStatusChange?: (caseId: string, status: string) => void;
   readOnly?: boolean;
+  isOwner?: boolean;
 }
 
 const overlayVariants = {
@@ -57,7 +67,9 @@ export const ProjectInfoModal = ({
   onVoteUp,
   onVoteDown,
   onCommentSubmit,
+  onStatusChange,
   readOnly = false,
+  isOwner = false,
 }: ProjectInfoModalProps) => {
   useEffect(() => {
     if (isOpen) {
@@ -97,6 +109,12 @@ export const ProjectInfoModal = ({
     }
   };
 
+  const handleStatusChange = (value: string) => {
+    if (data && onStatusChange && value !== data.rawStatus) {
+      onStatusChange(data.id, value);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && data && (
@@ -128,11 +146,36 @@ export const ProjectInfoModal = ({
 
             <div className={styles.body}>
               <div className={styles.left}>
-                {data.status && (
+                {isOwner ? (
                   <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>Статус</h3>
-                    <p className={styles.text}>{data.status}</p>
+                    <h3 className={styles.sectionTitle}>Статус проекта</h3>
+                    <Select
+                      value={data.rawStatus}
+                      onValueChange={handleStatusChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Выберите статус" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="VOTING">Голосование</SelectItem>
+                        <SelectItem value="APPROVED">Принятые</SelectItem>
+                        <SelectItem value="IN_PROGRESS">В процессе</SelectItem>
+                        <SelectItem value="ARCHIVED_COMPLETED">
+                          Завершенные
+                        </SelectItem>
+                        <SelectItem value="ARCHIVED_CANCELED">
+                          Отмененные
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </section>
+                ) : (
+                  data.status && (
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Статус</h3>
+                      <p className={styles.text}>{data.status}</p>
+                    </section>
+                  )
                 )}
 
                 <section className={styles.section}>
