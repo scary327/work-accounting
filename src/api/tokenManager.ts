@@ -4,6 +4,7 @@ import type { AuthTokens } from "./types";
 export const tokenManager = {
   setTokens: (accessToken: string, refreshToken: string): void => {
     const isSecure = window.location.protocol === "https:";
+    console.log("Setting tokens, secure mode:", isSecure);
     Cookies.set("accessToken", accessToken, {
       secure: isSecure,
       sameSite: "strict",

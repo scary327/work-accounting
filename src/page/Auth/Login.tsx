@@ -34,6 +34,7 @@ export const Login = () => {
       setIsRegistered(true);
 
       const isSecure = window.location.protocol === "https:";
+      console.log("Setting user cookies, secure mode:", isSecure);
 
       Cookies.set("user", JSON.stringify(response.user), {
         secure: isSecure,
