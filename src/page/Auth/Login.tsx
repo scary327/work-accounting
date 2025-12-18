@@ -33,11 +33,16 @@ export const Login = () => {
       setUser(response.user);
       setIsRegistered(true);
 
+      const isSecure = window.location.protocol === "https:";
+
       Cookies.set("user", JSON.stringify(response.user), {
-        secure: true,
+        secure: isSecure,
         sameSite: "strict",
       });
-      Cookies.set("isRegistered", "true", { secure: true, sameSite: "strict" });
+      Cookies.set("isRegistered", "true", {
+        secure: isSecure,
+        sameSite: "strict",
+      });
 
       navigate(URLS.DASHBOARD);
     } catch (err) {

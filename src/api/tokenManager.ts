@@ -3,12 +3,13 @@ import type { AuthTokens } from "./types";
 
 export const tokenManager = {
   setTokens: (accessToken: string, refreshToken: string): void => {
+    const isSecure = window.location.protocol === "https:";
     Cookies.set("accessToken", accessToken, {
-      secure: true,
+      secure: isSecure,
       sameSite: "strict",
     });
     Cookies.set("refreshToken", refreshToken, {
-      secure: true,
+      secure: isSecure,
       sameSite: "strict",
     });
   },
