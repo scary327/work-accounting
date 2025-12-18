@@ -1,12 +1,15 @@
 import { useCallback, useState, useEffect } from "react";
+import { useAtom } from "@reatom/npm-react";
 import { Button } from "../../components/ui/button";
 import { projectsApi } from "../../api";
+import { userAtom } from "../../model/user";
 import {
   useProjects,
   useProjectById,
   useProjectComments,
   useVoteProject,
   useAddComment,
+  useUpdateProjectStatus,
 } from "../../api/hooks/useProjects";
 import { NotificationContainer } from "../../components/Notification";
 import { useNotifications } from "../../hooks/useNotifications";
@@ -33,6 +36,7 @@ export const CasesSelection = () => {
     CaseModalData | undefined
   >();
 
+  const [user] = useAtom(userAtom);
   const { notifications, addNotification, removeNotification } =
     useNotifications();
 
@@ -54,6 +58,7 @@ export const CasesSelection = () => {
   // Мутации для голосования и комментариев
   const voteProjectMutation = useVoteProject();
   const addCommentMutation = useAddComment();
+  const updateStatusMutation = useUpdateProjectStatus();
 
   // Обновление данных модалки при загрузке деталей проекта
   useEffect(() => {
@@ -74,6 +79,7 @@ export const CasesSelection = () => {
           text: comment.body,
         })),
         userVote: projectDetails.userVote ?? null,
+        status: projectDetails.status,
       });
     }
   }, [projectDetails, comments]);
@@ -226,6 +232,23 @@ export const CasesSelection = () => {
     [addCommentMutation, addNotification]
   );
 
+  const handleStatusChange = useCallback(
+    async (caseId: string, status: string) => {
+      const numId = parseInt(caseId, 10);
+      try {
+        await updateStatusMutation.mutateAsync({ id: numId, status });
+        addNotification("Статус проекта обновлен", "success");
+        if (selectedModalData) {
+          setSelectedModalData({ ...selectedModalData, status });
+        }
+      } catch (error) {
+        console.error("Failed to update status:", error);
+        addNotification("Не удалось обновить статус", "error");
+      }
+    },
+    [updateStatusMutation, addNotification, selectedModalData]
+  );
+
   return (
     <div className={styles.casesSelection}>
       <NotificationContainer
@@ -256,10 +279,16 @@ export const CasesSelection = () => {
       <CaseModal
         isOpen={selectedCaseId !== null}
         data={selectedModalData}
+        isOwner={
+          !!user &&
+          !!projectDetails &&
+          String(user.id) === String(projectDetails.creatorId)
+        }
         onClose={() => setSelectedCaseId(null)}
         onVoteUp={handleVoteUp}
         onVoteDown={handleVoteDown}
         onCommentSubmit={handleCommentSubmit}
+        onStatusChange={handleStatusChange}
       />
 
       <CreateCaseModal

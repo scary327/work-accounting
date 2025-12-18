@@ -2,6 +2,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, ThumbsUp, ThumbsDown, Send } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "../../../components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
 import styles from "./CaseModal.module.css";
 
 export interface Comment {
@@ -22,15 +29,18 @@ export interface CaseModalData {
   downvotes: number;
   comments: Comment[];
   userVote?: boolean | null;
+  status?: string;
 }
 
 interface CaseModalProps {
   isOpen: boolean;
   data?: CaseModalData;
+  isOwner?: boolean;
   onClose: () => void;
   onVoteUp?: (caseId: string) => void;
   onVoteDown?: (caseId: string) => void;
   onCommentSubmit?: (caseId: string, comment: string) => void;
+  onStatusChange?: (caseId: string, status: string) => void;
 }
 
 const overlayVariants = {
@@ -46,10 +56,12 @@ const modalVariants = {
 export const CaseModal = ({
   isOpen,
   data,
+  isOwner,
   onClose,
   onVoteUp,
   onVoteDown,
   onCommentSubmit,
+  onStatusChange,
 }: CaseModalProps) => {
   useEffect(() => {
     if (isOpen) {
@@ -89,6 +101,12 @@ export const CaseModal = ({
     }
   };
 
+  const handleStatusChange = (value: string) => {
+    if (data && onStatusChange && value !== data.status) {
+      onStatusChange(data.id, value);
+    }
+  };
+
   console.log(data);
 
   return (
@@ -122,6 +140,31 @@ export const CaseModal = ({
 
             <div className={styles.body}>
               <div className={styles.left}>
+                {isOwner && (
+                  <section className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Статус проекта</h3>
+                    <Select
+                      value={data.status}
+                      onValueChange={handleStatusChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Выберите статус" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="VOTING">Голосование</SelectItem>
+                        <SelectItem value="APPROVED">Принятые</SelectItem>
+                        <SelectItem value="IN_PROGRESS">В процессе</SelectItem>
+                        <SelectItem value="ARCHIVED_COMPLETED">
+                          Завершенные
+                        </SelectItem>
+                        <SelectItem value="ARCHIVED_CANCELED">
+                          Отмененные
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </section>
+                )}
+
                 <section className={styles.section}>
                   <h3 className={styles.sectionTitle}>Автор</h3>
                   <p className={styles.text}>{data.author}</p>

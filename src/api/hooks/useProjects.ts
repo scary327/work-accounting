@@ -62,3 +62,18 @@ export const useAddComment = () => {
     },
   });
 };
+
+export const useUpdateProjectStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      projectsApi.updateProjectStatus(id, status),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: PROJECT_DETAILS_QUERY_KEY(data.id),
+      });
+      queryClient.invalidateQueries({ queryKey: PROJECTS_QUERY_KEY });
+    },
+  });
+};

@@ -75,4 +75,16 @@ export const projectsApi = {
   ): Promise<void> => {
     await apiClient.patch(`/projects/${id}/semester`, { semesterId });
   },
+
+  updateProjectStatus: async (
+    id: number,
+    status: string
+  ): Promise<ProjectDetailsResponse> => {
+    const response = await apiClient.patch<ProjectDetailsResponse>(
+      `/projects/${id}/status`,
+      {},
+      { params: { status } }
+    );
+    return response.data;
+  },
 };
