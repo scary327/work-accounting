@@ -107,7 +107,9 @@ export const ProjectCard = ({
           {isAccepted && card.grade !== undefined && (
             <div className={styles.gradeSection}>
               <div className={styles.grade}>
-                <div className={styles.gradeValue}>{card.grade}</div>
+                <div className={styles.gradeValue}>
+                  {(card.grade ?? 0).toFixed(2)}
+                </div>
                 <div className={styles.gradeLabel}>/100</div>
               </div>
             </div>

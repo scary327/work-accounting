@@ -60,7 +60,9 @@ export const CurrentTeam = ({
             </Card>
             <Card className={styles.statCard}>
               <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
-                <div className={styles.statValue}>{stats.averageGrade}</div>
+                <div className={styles.statValue}>
+                  {stats.averageGrade.toFixed(2)}
+                </div>
                 <div className={styles.statLabel}>Средняя оценка</div>
               </CardContent>
             </Card>

@@ -44,7 +44,7 @@ export const StudentHeader = ({ student }: StudentHeaderProps) => {
           <h1 className={styles.profileName}>{student.name}</h1>
           <div className={styles.profileMeta}>
             Студент • Участник {student.projectsCompleted} проектов • Средняя
-            оценка: {student.averageGrade}/100
+            оценка: {student.averageGrade.toFixed(2)}/100
           </div>
           {student.description && (
             <div className="text-sm text-gray-600 mt-2 mb-2">

@@ -67,7 +67,7 @@ export const ProjectHistory = memo(
                 </div>
 
                 <div className={styles.grade}>
-                  🏆 Итоговая оценка: {project.averageGrade}
+                  🏆 Итоговая оценка: {(project.averageGrade ?? 0).toFixed(2)}
                 </div>
               </motion.div>
             ))}

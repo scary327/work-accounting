@@ -17,6 +17,8 @@ import type {
   SemesterDetailsResponse,
   ProjectDetailsResponse,
 } from "../../api/types";
+import { GradeTeamModal } from "../Team/components/GradeTeamModal";
+import { GradesListModal } from "../Team/components/GradesListModal";
 import styles from "./Archive.module.css";
 
 /**
@@ -32,6 +34,15 @@ export const Archive = () => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedProjectDetails, setSelectedProjectDetails] =
     useState<ProjectDetailsResponse | null>(null);
+
+  const [isGradeOpen, setIsGradeOpen] = useState(false);
+  const [selectedTeamIdForGrade, setSelectedTeamIdForGrade] = useState<
+    string | null
+  >(null);
+
+  const [isGradesListOpen, setIsGradesListOpen] = useState(false);
+  const [selectedTeamIdForGradesList, setSelectedTeamIdForGradesList] =
+    useState<string | null>(null);
 
   const [user] = useAtom(userAtom);
   const { notifications, addNotification, removeNotification } =
@@ -157,6 +168,60 @@ export const Archive = () => {
     ]
   );
 
+  const handleDeleteProject = useCallback(
+    async (caseId: string) => {
+      try {
+        await projectsApi.deleteProject(parseInt(caseId));
+        addNotification("Проект успешно удален", "success");
+        setSelectedCardId(null);
+        setSelectedProjectDetails(null);
+        fetchSemesters();
+      } catch (error) {
+        console.error("Failed to delete project:", error);
+        addNotification("Не удалось удалить проект", "error");
+      }
+    },
+    [addNotification, fetchSemesters]
+  );
+
+  const handleEditProject = useCallback(
+    async (
+      caseId: string,
+      data: {
+        title: string;
+        description: string;
+        techStack: string;
+        mentorIds: number[];
+      }
+    ) => {
+      try {
+        await projectsApi.updateProject(parseInt(caseId), {
+          ...data,
+          teamSize: 0, // Assuming default or preserved
+        });
+        addNotification("Проект успешно обновлен", "success");
+        // Refresh details
+        const details = await projectsApi.getProjectById(parseInt(caseId));
+        setSelectedProjectDetails(details);
+        fetchSemesters();
+      } catch (error) {
+        console.error("Failed to update project:", error);
+        addNotification("Не удалось обновить проект", "error");
+      }
+    },
+    [addNotification, fetchSemesters]
+  );
+
+  const handleGradeTeamClick = useCallback((teamId: string) => {
+    setSelectedTeamIdForGrade(teamId);
+    setIsGradeOpen(true);
+  }, []);
+
+  const handleViewGradesClick = useCallback((teamId: string) => {
+    setSelectedTeamIdForGradesList(teamId);
+    setIsGradesListOpen(true);
+  }, []);
+
   return (
     <div className={styles.archive}>
       <div className={styles.container}>
@@ -202,12 +267,21 @@ export const Archive = () => {
                   return {
                     id: project.id.toString(),
                     title: project.title,
-                    author: project.curators.join(", "), // Assuming curators are strings
-                    stack: project.techStack,
+                    author: (project.curators || []).join(", "),
+                    stack: project.techStack || "",
                     status: status,
-                    grade: project.teams[0]?.averageRating || 0, // Taking first team's rating for now
-                    teamName: project.teams[0]?.name || "Без команды",
-                    teamMembers: project.teams[0]?.members || [],
+                    teams: (project.teams || [])
+                      .filter((t) => t && t.id) // Ensure team and ID exist
+                      .map((t) => ({
+                        id: t.id.toString(),
+                        name: t.name || "",
+                        members: t.members || [],
+                        grade: t.averageRating,
+                      })),
+                    // Fallback using first team
+                    grade: project.teams?.[0]?.averageRating || 0,
+                    teamName: project.teams?.[0]?.name || "Без команды",
+                    teamMembers: project.teams?.[0]?.members || [],
                   };
                 }
               );
@@ -245,13 +319,17 @@ export const Archive = () => {
           setSelectedCardId(null);
           setSelectedProjectDetails(null);
         }}
-        readOnly={true}
+        readOnly={false}
         isOwner={
           !!user &&
           !!selectedProjectDetails &&
           String(user.id) === String(selectedProjectDetails.creatorId)
         }
         onStatusChange={handleStatusChange}
+        onDeleteProject={handleDeleteProject}
+        onEditProject={handleEditProject}
+        onGradeTeam={handleGradeTeamClick}
+        onViewGrades={handleViewGradesClick}
         data={
           selectedProjectDetails
             ? {
@@ -285,16 +363,47 @@ export const Archive = () => {
                       return selectedProjectDetails.status;
                   }
                 })(),
-                mentors: selectedProjectDetails.mentors
+                mentors: (selectedProjectDetails.mentors || [])
                   .map((m) => m.fullName)
                   .join(", "),
-                teamName: selectedProjectFromList?.teams[0]?.name,
-                teamMembers: selectedProjectFromList?.teams[0]?.members,
-                grade: selectedProjectFromList?.teams[0]?.averageRating,
+                mentorIds: (selectedProjectDetails.mentors || []).map(
+                  (m) => m.id
+                ),
+                teams: (selectedProjectFromList?.teams || [])
+                  .filter((t) => t && t.id)
+                  .map((t) => ({
+                    id: t.id.toString(),
+                    name: t.name || "",
+                    members: t.members || [],
+                    grade: t.averageRating,
+                  })),
+                teamName: selectedProjectFromList?.teams?.[0]?.name,
+                teamMembers: selectedProjectFromList?.teams?.[0]?.members,
+                grade: selectedProjectFromList?.teams?.[0]?.averageRating,
               }
             : undefined
         }
       />
+      {selectedTeamIdForGrade && (
+        <GradeTeamModal
+          isOpen={isGradeOpen}
+          onClose={() => setIsGradeOpen(false)}
+          teamId={parseInt(selectedTeamIdForGrade)}
+          onSuccess={fetchSemesters}
+          addNotification={addNotification}
+        />
+      )}
+
+      {selectedTeamIdForGradesList && (
+        <GradesListModal
+          isOpen={isGradesListOpen}
+          onClose={() => setIsGradesListOpen(false)}
+          teamId={parseInt(selectedTeamIdForGradesList)}
+          projectId={selectedCardId ? parseInt(selectedCardId) : undefined}
+          addNotification={addNotification}
+        />
+      )}
+
       <NotificationContainer
         notifications={notifications}
         onClose={removeNotification}

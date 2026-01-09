@@ -307,3 +307,5 @@
     max-width: 100%;
   }
 }
+.actionButtons { display: flex; gap: 0.5rem; margin-top: 1rem; } .editForm { display: flex; flex-direction: column; gap: 1rem; } .input { padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; } .teamGradeButton { margin-left: 0.5rem; font-size: 0.75rem; padding: 2px 6px; height: auto; }
+.editForm { display: flex; flex-direction: column; gap: 1rem; } .input { padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; }

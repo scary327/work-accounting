@@ -66,3 +66,4 @@
     padding: 1rem;
   }
 }
+.card { padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s; background: white; } .card:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); } .semester { font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; } .projectTitle { font-size: 1.125rem; font-weight: 600; color: #111827; margin-bottom: 0.5rem; } .dates { font-size: 0.875rem; color: #6b7280; } .grade { margin-top: 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.5rem; background-color: #f3f4f6; border-radius: 4px; font-size: 0.875rem; font-weight: 500; color: #1f2937; } .gradeValue { font-weight: 700; color: #2563eb; }

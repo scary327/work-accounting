@@ -4,6 +4,8 @@ export { authApi } from "./authApi";
 export { studentApi } from "./studentApi";
 export { projectsApi } from "./projectsApi";
 export { semestersApi } from "./semestersApi";
+export { teamsApi } from "./teamsApi";
+export { usersApi } from "./usersApi";
 export { tokenManager } from "./tokenManager";
 export type {
   RefreshTokenRequest,

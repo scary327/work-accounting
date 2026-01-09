@@ -87,4 +87,26 @@ export const projectsApi = {
     );
     return response.data;
   },
+
+  updateProject: async (
+    id: number,
+    data: CreateProjectRequest
+  ): Promise<ProjectDetailsResponse> => {
+    const response = await apiClient.put<ProjectDetailsResponse>(
+      `/projects/${id}`,
+      data
+    );
+    return response.data;
+  },
+
+  updateProjectMentors: async (
+    id: number,
+    mentorIds: number[]
+  ): Promise<ProjectDetailsResponse> => {
+    const response = await apiClient.put<ProjectDetailsResponse>(
+      `/projects/${id}/mentors`,
+      { mentorIds }
+    );
+    return response.data;
+  },
 };

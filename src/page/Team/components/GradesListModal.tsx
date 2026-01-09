@@ -9,14 +9,18 @@ interface GradesListModalProps {
   isOpen: boolean;
   onClose: () => void;
   teamId: number;
+  projectId?: number; // Optional filter
   addNotification: (message: string, type?: "success" | "error") => void;
+  onSuccess?: () => void;
 }
 
 export const GradesListModal = ({
   isOpen,
   onClose,
   teamId,
+  projectId,
   addNotification,
+  onSuccess,
 }: GradesListModalProps) => {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,15 +28,22 @@ export const GradesListModal = ({
   const fetchGrades = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await teamsApi.getGrades(teamId);
-      // API returns an array directly now
-      setGrades(Array.isArray(response) ? response : []);
+      let data: Grade[] = [];
+      if (projectId) {
+        // If projectId is present, use the specific endpoint which likely returns more details (IDs)
+        const response = await teamsApi.getProjectGrades(teamId, projectId);
+        data = Array.isArray(response) ? response : [];
+      } else {
+        const response = await teamsApi.getGrades(teamId);
+        data = Array.isArray(response) ? response : [];
+      }
+      setGrades(data);
     } catch (error) {
       console.error("Failed to fetch grades", error);
     } finally {
       setLoading(false);
     }
-  }, [teamId]);
+  }, [teamId, projectId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -46,6 +57,7 @@ export const GradesListModal = ({
       await teamsApi.deleteGrade(teamId, gradeId);
       addNotification("Оценка удалена", "success");
       fetchGrades();
+      onSuccess?.();
     } catch (error) {
       console.error("Failed to delete grade", error);
       addNotification("Не удалось удалить оценку", "error");
@@ -71,7 +83,7 @@ export const GradesListModal = ({
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <span className="font-bold text-lg mr-2">
-                      {grade.score}/10
+                      {grade.score}/100
                     </span>
                     <span className="text-sm text-gray-500">
                       от {grade.authorName || grade.evaluatorName}
@@ -79,15 +91,19 @@ export const GradesListModal = ({
                         ` (${new Date(grade.createdAt).toLocaleDateString()})`}
                     </span>
                   </div>
-                  {grade.id && (
+                  {grade.id ? (
                     <Button
-                      variant="ghost"
+                      variant="destructive"
                       size="sm"
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      className="ml-2"
                       onClick={() => handleDelete(grade.id!)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Удалить
                     </Button>
+                  ) : (
+                    /* Fallback for grades without ID (should not happen usually) */
+                    <span className="text-xs text-red-400">Нет ID</span>
                   )}
                 </div>
                 {grade.projectTitle && (
