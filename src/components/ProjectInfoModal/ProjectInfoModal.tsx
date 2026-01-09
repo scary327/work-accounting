@@ -1,9 +1,10 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ThumbsUp, ThumbsDown, Send, Trash2, List } from "lucide-react";
+import { X, ThumbsUp, ThumbsDown, Send, List } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
-import { usersApi, type UserDto } from "../../api/usersApi";
+import { type UserDto } from "../../api/usersApi";
+import { useUsers } from "../../api/hooks/useUsers";
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import {
@@ -106,7 +107,9 @@ export const ProjectInfoModal = ({
     description: "",
     stack: "",
   });
-  const [users, setUsers] = React.useState<UserDto[]>([]);
+
+  // Use cached users query
+  const { data: users = [] } = useUsers(isOpen && isOwner && !readOnly);
   const [selectedMentors, setSelectedMentors] = React.useState<UserDto[]>([]);
   const [mentorSearch, setMentorSearch] = React.useState("");
 
@@ -118,24 +121,26 @@ export const ProjectInfoModal = ({
         stack: data.stack,
       });
       setIsEditing(false);
-      // Fetch users for mentor selection if needed
-      if (isOwner && !readOnly) {
-        usersApi
-          .getUsers()
-          .then((u) => {
-            setUsers(u);
-            // Try to map current mentor IDs to User objects
-            if (data.mentorIds) {
-              const initialMentors = u.filter((user) =>
-                data.mentorIds?.includes(user.id)
-              );
-              setSelectedMentors(initialMentors);
-            }
-          })
-          .catch(console.error);
-      }
     }
-  }, [isOpen, data, isOwner, readOnly]);
+  }, [isOpen, data]);
+
+  // Update selected mentors when users are loaded or modal opens
+  useEffect(() => {
+    if (isOpen && isOwner && !readOnly && users.length > 0 && data?.mentorIds) {
+      const initialMentors = users.filter((user) =>
+        data.mentorIds?.includes(user.id)
+      );
+      setSelectedMentors(initialMentors);
+    } else if (
+      isOpen &&
+      isOwner &&
+      !readOnly &&
+      users.length > 0 &&
+      !data?.mentorIds
+    ) {
+      setSelectedMentors([]);
+    }
+  }, [isOpen, isOwner, readOnly, users, data?.mentorIds]);
 
   useEffect(() => {
     if (isOpen) {
@@ -427,13 +432,12 @@ export const ProjectInfoModal = ({
                       <p className={styles.text}>{data.author}</p>
                     </section>
 
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Менторы</h3>
-                  <p className={styles.text}>{data.mentors || "Не указаны"}</p>
-                </section>
-                        <p className={styles.text}>{data.mentors}</p>
-                      </section>
-                    )}
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Менторы</h3>
+                      <p className={styles.text}>
+                        {data.mentors || "Не указаны"}
+                      </p>
+                    </section>
 
                     <section className={styles.section}>
                       <h3 className={styles.sectionTitle}>Описание</h3>

@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { usersApi, type UserDto } from "../../../api/usersApi";
+import { type UserDto } from "../../../api/usersApi";
+import { useUsers } from "../../../api/hooks/useUsers";
 import styles from "./CreateCaseModal.module.css";
 import { Badge } from "../../../components/ui/badge";
 
@@ -34,14 +35,13 @@ export const CreateCaseModal = ({
   onClose,
   onSubmit,
 }: CreateCaseModalProps) => {
-  const [users, setUsers] = useState<UserDto[]>([]);
+  const { data: users = [] } = useUsers(isOpen);
   const [selectedMentors, setSelectedMentors] = useState<UserDto[]>([]);
   const [mentorSearch, setMentorSearch] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      usersApi.getUsers().then(setUsers).catch(console.error);
     } else {
       document.body.style.overflow = "";
       setSelectedMentors([]);

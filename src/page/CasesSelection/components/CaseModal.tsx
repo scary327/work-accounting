@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, ThumbsUp, ThumbsDown, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui/button";
-import { usersApi, type UserDto } from "../../../api/usersApi";
+import { type UserDto } from "../../../api/usersApi";
 import { useUsers } from "../../../api/hooks/useUsers";
 import { Badge } from "../../../components/ui/badge";
 import { Input } from "../../../components/ui/input";
