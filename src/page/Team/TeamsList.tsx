@@ -106,7 +106,13 @@ export const TeamsList = () => {
             animate="show"
           >
             {teams.map((team) => (
-              <motion.div key={team.id} variants={item}>
+              <motion.div
+                key={team.id}
+                variants={item}
+                initial="hidden"
+                animate="show"
+                layout
+              >
                 <Card
                   className={`${styles.card} group relative`}
                   onClick={() => navigate(`/team/${team.id}`)}

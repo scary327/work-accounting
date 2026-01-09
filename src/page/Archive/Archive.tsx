@@ -18,6 +18,7 @@ import type {
   ProjectDetailsResponse,
 } from "../../api/types";
 import { GradeTeamModal } from "../Team/components/GradeTeamModal";
+import { GradesListModal } from "../Team/components/GradesListModal";
 import styles from "./Archive.module.css";
 
 /**
@@ -38,6 +39,10 @@ export const Archive = () => {
   const [selectedTeamIdForGrade, setSelectedTeamIdForGrade] = useState<
     string | null
   >(null);
+
+  const [isGradesListOpen, setIsGradesListOpen] = useState(false);
+  const [selectedTeamIdForGradesList, setSelectedTeamIdForGradesList] =
+    useState<string | null>(null);
 
   const [user] = useAtom(userAtom);
   const { notifications, addNotification, removeNotification } =
@@ -212,6 +217,11 @@ export const Archive = () => {
     setIsGradeOpen(true);
   }, []);
 
+  const handleViewGradesClick = useCallback((teamId: string) => {
+    setSelectedTeamIdForGradesList(teamId);
+    setIsGradesListOpen(true);
+  }, []);
+
   return (
     <div className={styles.archive}>
       <div className={styles.container}>
@@ -261,9 +271,9 @@ export const Archive = () => {
                     stack: project.techStack || "",
                     status: status,
                     teams: (project.teams || [])
-                      .filter((t) => t)
+                      .filter((t) => t && t.id) // Ensure team and ID exist
                       .map((t) => ({
-                        id: t.id?.toString() || "",
+                        id: t.id.toString(),
                         name: t.name || "",
                         members: t.members || [],
                         grade: t.averageRating,
@@ -319,6 +329,7 @@ export const Archive = () => {
         onDeleteProject={handleDeleteProject}
         onEditProject={handleEditProject}
         onGradeTeam={handleGradeTeamClick}
+        onViewGrades={handleViewGradesClick}
         data={
           selectedProjectDetails
             ? {
@@ -359,9 +370,9 @@ export const Archive = () => {
                   (m) => m.id
                 ),
                 teams: (selectedProjectFromList?.teams || [])
-                  .filter((t) => t)
+                  .filter((t) => t && t.id)
                   .map((t) => ({
-                    id: t.id?.toString() || "",
+                    id: t.id.toString(),
                     name: t.name || "",
                     members: t.members || [],
                     grade: t.averageRating,
@@ -379,6 +390,16 @@ export const Archive = () => {
           onClose={() => setIsGradeOpen(false)}
           teamId={parseInt(selectedTeamIdForGrade)}
           onSuccess={fetchSemesters}
+          addNotification={addNotification}
+        />
+      )}
+
+      {selectedTeamIdForGradesList && (
+        <GradesListModal
+          isOpen={isGradesListOpen}
+          onClose={() => setIsGradesListOpen(false)}
+          teamId={parseInt(selectedTeamIdForGradesList)}
+          projectId={selectedCardId ? parseInt(selectedCardId) : undefined}
           addNotification={addNotification}
         />
       )}

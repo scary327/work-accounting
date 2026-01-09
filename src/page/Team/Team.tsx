@@ -208,6 +208,7 @@ export const Team = () => {
               onClose={() => setIsGradesListOpen(false)}
               teamId={teamData.id}
               addNotification={addNotification}
+              onSuccess={fetchTeam}
             />
           </>
         )}

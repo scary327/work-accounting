@@ -82,6 +82,8 @@ export const CasesSelection = () => {
         })),
         userVote: projectDetails.userVote ?? null,
         status: projectDetails.status,
+        mentorIds: projectDetails.mentors?.map((m) => m.id) || [],
+        mentors: projectDetails.mentors || [],
       });
     }
   }, [projectDetails, comments]);
@@ -195,6 +197,7 @@ export const CasesSelection = () => {
       description: string;
       stack: string;
       teamSize: number;
+      mentorIds: number[];
     }) => {
       try {
         await projectsApi.createProject({
@@ -202,7 +205,7 @@ export const CasesSelection = () => {
           description: formData.description,
           techStack: formData.stack,
           teamSize: formData.teamSize,
-          mentorIds: [], // TODO: Add mentor selection
+          mentorIds: formData.mentorIds,
         });
         await queryClient.invalidateQueries({ queryKey: ["projects"] });
         addNotification(
@@ -260,6 +263,56 @@ export const CasesSelection = () => {
     [updateStatusMutation, addNotification, selectedModalData]
   );
 
+  const handleDeleteProject = useCallback(
+    async (caseId: string) => {
+      const numId = parseInt(caseId, 10);
+      try {
+        await projectsApi.deleteProject(numId);
+        await queryClient.invalidateQueries({ queryKey: ["projects"] });
+        setSelectedCaseId(null);
+        addNotification("Проект успешно удален", "success");
+      } catch (error) {
+        console.error("Failed to delete project:", error);
+        addNotification("Не удалось удалить проект", "error");
+      }
+    },
+    [addNotification, queryClient]
+  );
+
+  const handleEditProject = useCallback(
+    async (
+      caseId: string,
+      data: {
+        title: string;
+        description: string;
+        techStack: string;
+        mentorIds: number[];
+      }
+    ) => {
+      const numId = parseInt(caseId, 10);
+      try {
+        await projectsApi.updateProject(numId, {
+          title: data.title,
+          description: data.description,
+          techStack: data.techStack,
+          teamSize: 5,
+          mentorIds: data.mentorIds,
+        });
+
+        await projectsApi.updateProjectMentors(numId, data.mentorIds);
+
+        await queryClient.invalidateQueries({ queryKey: ["projects"] });
+        await queryClient.invalidateQueries({ queryKey: ["project", numId] });
+
+        addNotification("Проект успешно обновлен", "success");
+      } catch (error) {
+        console.error("Failed to update project:", error);
+        addNotification("Не удалось обновить проект", "error");
+      }
+    },
+    [addNotification, queryClient]
+  );
+
   return (
     <div className={styles.casesSelection}>
       <NotificationContainer
@@ -300,6 +353,8 @@ export const CasesSelection = () => {
         onVoteDown={handleVoteDown}
         onCommentSubmit={handleCommentSubmit}
         onStatusChange={handleStatusChange}
+        onDeleteProject={handleDeleteProject}
+        onEditProject={handleEditProject}
       />
 
       <CreateCaseModal

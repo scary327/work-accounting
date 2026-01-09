@@ -1,8 +1,11 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ThumbsUp, ThumbsDown, Send } from "lucide-react";
+import { X, ThumbsUp, ThumbsDown, Send, Trash2, List } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
+import { usersApi, type UserDto } from "../../api/usersApi";
+import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
@@ -67,6 +70,7 @@ interface ProjectInfoModalProps {
     }
   ) => void;
   onGradeTeam?: (teamId: string) => void;
+  onViewGrades?: (teamId: string) => void;
   readOnly?: boolean;
   isOwner?: boolean;
 }
@@ -92,6 +96,7 @@ export const ProjectInfoModal = ({
   onDeleteProject,
   onEditProject,
   onGradeTeam,
+  onViewGrades,
   readOnly = false,
   isOwner = false,
 }: ProjectInfoModalProps) => {
@@ -101,6 +106,9 @@ export const ProjectInfoModal = ({
     description: "",
     stack: "",
   });
+  const [users, setUsers] = React.useState<UserDto[]>([]);
+  const [selectedMentors, setSelectedMentors] = React.useState<UserDto[]>([]);
+  const [mentorSearch, setMentorSearch] = React.useState("");
 
   useEffect(() => {
     if (isOpen && data) {
@@ -110,8 +118,24 @@ export const ProjectInfoModal = ({
         stack: data.stack,
       });
       setIsEditing(false);
+      // Fetch users for mentor selection if needed
+      if (isOwner && !readOnly) {
+        usersApi
+          .getUsers()
+          .then((u) => {
+            setUsers(u);
+            // Try to map current mentor IDs to User objects
+            if (data.mentorIds) {
+              const initialMentors = u.filter((user) =>
+                data.mentorIds?.includes(user.id)
+              );
+              setSelectedMentors(initialMentors);
+            }
+          })
+          .catch(console.error);
+      }
     }
-  }, [isOpen, data]);
+  }, [isOpen, data, isOwner, readOnly]);
 
   useEffect(() => {
     if (isOpen) {
@@ -137,11 +161,28 @@ export const ProjectInfoModal = ({
         title: editFormData.title,
         description: editFormData.description,
         techStack: editFormData.stack,
-        mentorIds: data.mentorIds || [], // Assuming we don't edit mentors here for simplicity yet, or add UI for it
+        mentorIds: selectedMentors.map((m) => m.id),
       });
       setIsEditing(false);
     }
   };
+
+  const toggleMentor = (user: UserDto) => {
+    if (selectedMentors.find((m) => m.id === user.id)) {
+      setSelectedMentors(selectedMentors.filter((m) => m.id !== user.id));
+    } else {
+      setSelectedMentors([...selectedMentors, user]);
+    }
+  };
+
+  const filteredUsers = users.filter((u) => {
+    const fullName =
+      `${u.lastName} ${u.firstName} ${u.middleName}`.toLowerCase();
+    return (
+      !selectedMentors.find((m) => m.id === u.id) &&
+      fullName.includes(mentorSearch.toLowerCase())
+    );
+  });
 
   const handleEditChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -277,6 +318,63 @@ export const ProjectInfoModal = ({
                         required
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Менторы
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {selectedMentors.map((mentor) => (
+                          <Badge
+                            key={mentor.id}
+                            variant="secondary"
+                            className="pr-1 gap-1"
+                          >
+                            {mentor.lastName} {mentor.firstName}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-4 w-4 rounded-full hover:bg-transparent"
+                              onClick={() => toggleMentor(mentor)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="Поиск ментора..."
+                          value={mentorSearch}
+                          onChange={(e) => setMentorSearch(e.target.value)}
+                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                        />
+                        {mentorSearch && (
+                          <div className="absolute w-full mt-1 bg-white border rounded-md shadow-lg max-h-40 overflow-y-auto z-50">
+                            {filteredUsers.length > 0 ? (
+                              filteredUsers.map((user) => (
+                                <div
+                                  key={user.id}
+                                  className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                  onClick={() => {
+                                    toggleMentor(user);
+                                    setMentorSearch("");
+                                  }}
+                                >
+                                  {user.lastName} {user.firstName}{" "}
+                                  {user.middleName}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="p-2 text-sm text-gray-500">
+                                Ничего не найдено
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex gap-2 justify-end mt-4">
                       <Button
                         type="button"
@@ -329,9 +427,10 @@ export const ProjectInfoModal = ({
                       <p className={styles.text}>{data.author}</p>
                     </section>
 
-                    {data.mentors && (
-                      <section className={styles.section}>
-                        <h3 className={styles.sectionTitle}>Менторы</h3>
+                <section className={styles.section}>
+                  <h3 className={styles.sectionTitle}>Менторы</h3>
+                  <p className={styles.text}>{data.mentors || "Не указаны"}</p>
+                </section>
                         <p className={styles.text}>{data.mentors}</p>
                       </section>
                     )}
@@ -363,19 +462,31 @@ export const ProjectInfoModal = ({
                     {data.teams && data.teams.length > 0 ? (
                       data.teams.map((team, idx) => (
                         <section key={idx} className={styles.section}>
-                          <h3 className={styles.sectionTitle}>
-                            Команда: {team.name}
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className={`${styles.sectionTitle} mb-0`}>
+                              Команда: {team.name}
+                            </h3>
                             {onGradeTeam && (
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className={styles.teamGradeButton}
                                 onClick={() => onGradeTeam(team.id)}
                               >
                                 Оценить
                               </Button>
                             )}
-                          </h3>
+                            {onViewGrades && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => onViewGrades(team.id)}
+                                title="Список оценок"
+                              >
+                                <List className="w-4 h-4 mr-1" />
+                                <span className="text-xs">Оценки</span>
+                              </Button>
+                            )}
+                          </div>
                           {team.members && team.members.length > 0 && (
                             <ul className={styles.goalsList}>
                               {team.members.map((member, mIdx) => (

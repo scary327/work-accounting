@@ -1,7 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ThumbsUp, ThumbsDown, Send } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui/button";
+import { usersApi, type UserDto } from "../../../api/usersApi";
+import { useUsers } from "../../../api/hooks/useUsers";
+import { Badge } from "../../../components/ui/badge";
+import { Input } from "../../../components/ui/input";
 import {
   Select,
   SelectContent,
@@ -30,6 +34,8 @@ export interface CaseModalData {
   comments: Comment[];
   userVote?: boolean | null;
   status?: string;
+  mentorIds?: number[];
+  mentors?: { id: number; fullName: string }[];
 }
 
 interface CaseModalProps {
@@ -41,6 +47,16 @@ interface CaseModalProps {
   onVoteDown?: (caseId: string) => void;
   onCommentSubmit?: (caseId: string, comment: string) => void;
   onStatusChange?: (caseId: string, status: string) => void;
+  onDeleteProject?: (caseId: string) => void;
+  onEditProject?: (
+    caseId: string,
+    data: {
+      title: string;
+      description: string;
+      techStack: string;
+      mentorIds: number[];
+    }
+  ) => void;
 }
 
 const overlayVariants = {
@@ -62,7 +78,44 @@ export const CaseModal = ({
   onVoteDown,
   onCommentSubmit,
   onStatusChange,
+  onDeleteProject,
+  onEditProject,
 }: CaseModalProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    description: "",
+    stack: "",
+  });
+
+  // Use cached users query
+  const { data: users = [] } = useUsers(isOpen && !!isOwner);
+  const [selectedMentors, setSelectedMentors] = useState<UserDto[]>([]);
+  const [mentorSearch, setMentorSearch] = useState("");
+
+  useEffect(() => {
+    if (isOpen && data) {
+      setEditFormData({
+        title: data.title,
+        description: data.description,
+        stack: data.stack,
+      });
+      setIsEditing(false);
+    }
+  }, [isOpen, data]);
+
+  // Update selected mentors when users are loaded or modal opens
+  useEffect(() => {
+    if (isOpen && isOwner && users.length > 0 && data?.mentorIds) {
+      const initialMentors = users.filter((user) =>
+        data.mentorIds?.includes(user.id)
+      );
+      setSelectedMentors(initialMentors);
+    } else if (isOpen && isOwner && users.length > 0 && !data?.mentorIds) {
+      setSelectedMentors([]);
+    }
+  }, [isOpen, isOwner, users, data?.mentorIds]);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -76,6 +129,43 @@ export const CaseModal = ({
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onEditProject && data) {
+      onEditProject(data.id, {
+        title: editFormData.title,
+        description: editFormData.description,
+        techStack: editFormData.stack,
+        mentorIds: selectedMentors.map((m) => m.id),
+      });
+      setIsEditing(false);
+    }
+  };
+
+  const toggleMentor = (user: UserDto) => {
+    if (selectedMentors.find((m) => m.id === user.id)) {
+      setSelectedMentors(selectedMentors.filter((m) => m.id !== user.id));
+    } else {
+      setSelectedMentors([...selectedMentors, user]);
+    }
+  };
+
+  const filteredUsers = users.filter((u) => {
+    const fullName =
+      `${u.lastName} ${u.firstName} ${u.middleName}`.toLowerCase();
+    return (
+      !selectedMentors.find((m) => m.id === u.id) &&
+      fullName.includes(mentorSearch.toLowerCase())
+    );
+  });
+
+  const handleDelete = () => {
+    if (window.confirm("Удалить проект?")) {
+      onDeleteProject?.(data!.id);
       onClose();
     }
   };
@@ -140,57 +230,203 @@ export const CaseModal = ({
 
             <div className={styles.body}>
               <div className={styles.left}>
-                {isOwner && (
-                  <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>Статус проекта</h3>
-                    <Select
-                      value={data.status}
-                      onValueChange={handleStatusChange}
+                {isOwner && !isEditing && (
+                  <div className="flex gap-2 mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Выберите статус" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="VOTING">Голосование</SelectItem>
-                        <SelectItem value="APPROVED">Принятые</SelectItem>
-                        <SelectItem value="IN_PROGRESS">В процессе</SelectItem>
-                        <SelectItem value="ARCHIVED_COMPLETED">
-                          Завершенные
-                        </SelectItem>
-                        <SelectItem value="ARCHIVED_CANCELED">
-                          Отмененные
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </section>
+                      Редактировать
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                    >
+                      Удалить
+                    </Button>
+                  </div>
                 )}
 
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Автор</h3>
-                  <p className={styles.text}>{data.author}</p>
-                </section>
+                {isEditing ? (
+                  <form onSubmit={handleEditSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Название
+                      </label>
+                      <Input
+                        value={editFormData.title}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            title: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Описание
+                      </label>
+                      <textarea
+                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        value={editFormData.description}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            description: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Стек
+                      </label>
+                      <Input
+                        value={editFormData.stack}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            stack: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Менторы
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {selectedMentors.map((mentor) => (
+                          <Badge
+                            key={mentor.id}
+                            variant="secondary"
+                            className="pr-1 gap-1"
+                          >
+                            {mentor.lastName} {mentor.firstName}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-4 w-4 rounded-full hover:bg-transparent"
+                              onClick={() => toggleMentor(mentor)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="Поиск ментора..."
+                          value={mentorSearch}
+                          onChange={(e) => setMentorSearch(e.target.value)}
+                        />
+                        {mentorSearch && (
+                          <div className="absolute w-full mt-1 bg-white border rounded-md shadow-lg max-h-40 overflow-y-auto z-50">
+                            {filteredUsers.length > 0 ? (
+                              filteredUsers.map((user) => (
+                                <div
+                                  key={user.id}
+                                  className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                  onClick={() => {
+                                    toggleMentor(user);
+                                    setMentorSearch("");
+                                  }}
+                                >
+                                  {user.lastName} {user.firstName}{" "}
+                                  {user.middleName}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="p-2 text-sm text-gray-500">
+                                Ничего не найдено
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="submit">Сохранить</Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        Отмена
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    {isOwner && (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Статус проекта</h3>
+                        <Select
+                          value={data.status}
+                          onValueChange={handleStatusChange}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Выберите статус" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="VOTING">Голосование</SelectItem>
+                            <SelectItem value="APPROVED">Принятые</SelectItem>
+                            <SelectItem value="IN_PROGRESS">
+                              В процессе
+                            </SelectItem>
+                            <SelectItem value="ARCHIVED_COMPLETED">
+                              Завершенные
+                            </SelectItem>
+                            <SelectItem value="ARCHIVED_CANCELED">
+                              Отмененные
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </section>
+                    )}
 
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Описание</h3>
-                  <p className={styles.text}>{data.description}</p>
-                </section>
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Менторы</h3>
+                      {data.mentors && data.mentors.length > 0 ? (
+                        <p className={styles.text}>
+                          {data.mentors.map((m) => m.fullName).join(", ")}
+                        </p>
+                      ) : (
+                        <p className={styles.text}>{data.author}</p>
+                      )}
+                    </section>
 
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Семестр</h3>
-                  <p className={styles.text}>{data.semester}</p>
-                </section>
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Описание</h3>
+                      <p className={styles.text}>{data.description}</p>
+                    </section>
 
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Стек технологий</h3>
-                  <p className={styles.text}>{data.stack}</p>
-                </section>
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Семестр</h3>
+                      <p className={styles.text}>{data.semester}</p>
+                    </section>
 
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>
-                    Требуемый размер команды
-                  </h3>
-                  <p className={styles.text}>{data.teamSize}</p>
-                </section>
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Стек технологий</h3>
+                      <p className={styles.text}>{data.stack}</p>
+                    </section>
+
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>
+                        Требуемый размер команды
+                      </h3>
+                      <p className={styles.text}>{data.teamSize}</p>
+                    </section>
+                  </>
+                )}
               </div>
 
               <div className={styles.right}>
