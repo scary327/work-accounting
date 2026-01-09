@@ -7,6 +7,13 @@ export interface ArchiveCardData {
   author: string;
   stack: string;
   status: "completed" | "canceled" | "voting" | "approved" | "in_progress";
+  teams?: Array<{
+    id: string; // or number
+    name: string;
+    members: string[];
+    grade?: number;
+  }>;
+  // Deprecated fields, kept for compatibility if needed, but better to migrate
   grade?: number;
   teamName?: string;
   teamMembers?: string[];
@@ -76,35 +83,63 @@ export const ArchiveCard = ({
       {/* Title */}
       <h3 className={styles.title}>{card.title}</h3>
 
-      {/* Author */}
-      <p className={styles.author}>{card.author}</p>
-
-      {/* Stack */}
-      <div className={styles.stack}>{card.stack}</div>
-
-      {/* Team Info */}
-      {(isCompleted || card.status === "in_progress") && card.teamName && (
-        <div className={styles.team}>
-          <div className={styles.teamLabel}>{card.teamName}</div>
-          <div className={styles.teamMembers}>
-            {card.teamMembers?.join(", ")}
+      {/* Team Info (New Format) */}
+      {(isCompleted || card.status === "in_progress") &&
+        card.teams &&
+        card.teams.length > 0 &&
+        card.teams.map((team, idx) => (
+          <div key={idx} className={styles.team}>
+            <div className={styles.teamInfo}>
+              <div className={styles.teamLabel}>{team.name}</div>
+              <div className={styles.teamMembers}>
+                {team.members?.join(", ")}
+              </div>
+            </div>
+            {isCompleted && team.grade !== undefined && team.grade > 0 && (
+              <div className={styles.teamGrade} title="Оценка команды">
+                {team.grade.toFixed(2)}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        ))}
 
-      {/* Grade */}
-      {isCompleted && card.grade !== undefined && (
-        <div className={styles.grade}>
-          <span className={styles.gradeScore}>{card.grade}/100</span>
-          <span className={styles.gradeLabel}>
-            {card.grade >= 85
-              ? "Отлично"
-              : card.grade >= 70
-              ? "Хорошо"
-              : "Удовлетворительно"}
-          </span>
-        </div>
-      )}
+      {/* Team Info (Old Format - Fallback) */}
+      {(isCompleted || card.status === "in_progress") &&
+        !card.teams &&
+        card.teamName && (
+          <div className={styles.team}>
+            <div className={styles.teamInfo}>
+              <div className={styles.teamLabel}>{card.teamName}</div>
+              <div className={styles.teamMembers}>
+                {card.teamMembers?.join(", ")}
+              </div>
+            </div>
+            {/* Grade is now rendered next to team name if possible, or below if kept as separate block. 
+                But since we want "grade right of team", let's move it here or keep it below? 
+                The user requested "grade right of team". */}
+          </div>
+        )}
+
+      {/* Grade (Old Format - Only if no teams array provided to avoid duplication) */}
+      {isCompleted &&
+        !card.teams &&
+        card.grade !== undefined &&
+        card.grade > 0 && (
+          <div className={styles.grade}>
+            <span className={styles.gradeScore}>
+              {(card.grade ?? 0).toFixed(2)}/100
+            </span>
+            <span className={styles.gradeLabel}>
+              {card.grade >= 85
+                ? "Отлично"
+                : card.grade >= 70
+                ? "Хорошо"
+                : card.grade >= 40
+                ? "Удовлетворительно"
+                : "Неудовлетворительно"}
+            </span>
+          </div>
+        )}
 
       {/* Button for canceled cases */}
       {card.status === "canceled" && (

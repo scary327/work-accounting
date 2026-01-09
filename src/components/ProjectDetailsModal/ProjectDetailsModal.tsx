@@ -37,7 +37,7 @@ export const ProjectDetailsModal = ({
   const getGradeLabel = (score: number): string => {
     if (score >= 85) return "Отлично";
     if (score >= 70) return "Хорошо";
-    if (score >= 55) return "Удовлетворительно";
+    if (score >= 40) return "Удовлетворительно";
     return "Неудовлетворительно";
   };
 
@@ -140,7 +140,7 @@ export const ProjectDetailsModal = ({
                     {checkpoint.title}
                   </span>
                   <span className={styles.checkpointScore}>
-                    {checkpoint.score}/100
+                    {(checkpoint.score ?? 0).toFixed(2)}/100
                   </span>
                 </div>
                 {checkpoint.comment && (
@@ -161,7 +161,8 @@ export const ProjectDetailsModal = ({
               <div className={styles.checkpointHeader}>
                 <span className={styles.checkpointTitle}>Итоговая оценка</span>
                 <span className={styles.checkpointScore}>
-                  {data.grade}/100 — {getGradeLabel(data.grade)}
+                  {(data.grade ?? 0).toFixed(2)}/100 —{" "}
+                  {getGradeLabel(data.grade ?? 0)}
                 </span>
               </div>
             </motion.div>

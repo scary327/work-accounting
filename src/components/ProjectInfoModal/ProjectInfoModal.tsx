@@ -1,3 +1,4 @@
+import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ThumbsUp, ThumbsDown, Send } from "lucide-react";
 import { useEffect } from "react";
@@ -33,9 +34,17 @@ export interface ProjectInfoModalData {
   status?: string;
   rawStatus?: string;
   mentors?: string;
+  mentorIds?: number[];
   teamName?: string;
   teamMembers?: string[];
+  teams?: Array<{
+    id: string;
+    name: string;
+    members: string[];
+    grade?: number;
+  }>;
   grade?: number;
+  creatorId?: string | number;
 }
 
 interface ProjectInfoModalProps {
@@ -46,6 +55,18 @@ interface ProjectInfoModalProps {
   onVoteDown?: (caseId: string) => void;
   onCommentSubmit?: (caseId: string, comment: string) => void;
   onStatusChange?: (caseId: string, status: string) => void;
+  // New props for management
+  onDeleteProject?: (caseId: string) => void;
+  onEditProject?: (
+    caseId: string,
+    data: {
+      title: string;
+      description: string;
+      techStack: string;
+      mentorIds: number[];
+    }
+  ) => void;
+  onGradeTeam?: (teamId: string) => void;
   readOnly?: boolean;
   isOwner?: boolean;
 }
@@ -68,9 +89,30 @@ export const ProjectInfoModal = ({
   onVoteDown,
   onCommentSubmit,
   onStatusChange,
+  onDeleteProject,
+  onEditProject,
+  onGradeTeam,
   readOnly = false,
   isOwner = false,
 }: ProjectInfoModalProps) => {
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editFormData, setEditFormData] = React.useState({
+    title: "",
+    description: "",
+    stack: "",
+  });
+
+  useEffect(() => {
+    if (isOpen && data) {
+      setEditFormData({
+        title: data.title,
+        description: data.description,
+        stack: data.stack,
+      });
+      setIsEditing(false);
+    }
+  }, [isOpen, data]);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -84,6 +126,37 @@ export const ProjectInfoModal = ({
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onEditProject && data) {
+      onEditProject(data.id, {
+        title: editFormData.title,
+        description: editFormData.description,
+        techStack: editFormData.stack,
+        mentorIds: data.mentorIds || [], // Assuming we don't edit mentors here for simplicity yet, or add UI for it
+      });
+      setIsEditing(false);
+    }
+  };
+
+  const handleEditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDelete = () => {
+    if (
+      window.confirm(
+        "Вы уверены, что хотите удалить этот проект? Это действие необратимо."
+      )
+    ) {
+      onDeleteProject?.(data!.id);
       onClose();
     }
   };
@@ -146,95 +219,213 @@ export const ProjectInfoModal = ({
 
             <div className={styles.body}>
               <div className={styles.left}>
-                {isOwner ? (
-                  <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>Статус проекта</h3>
-                    <Select
-                      value={data.rawStatus}
-                      onValueChange={handleStatusChange}
+                {isOwner && !readOnly && !isEditing && (
+                  <div className={styles.actionButtons}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Выберите статус" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="VOTING">Голосование</SelectItem>
-                        <SelectItem value="APPROVED">Принятые</SelectItem>
-                        <SelectItem value="IN_PROGRESS">В процессе</SelectItem>
-                        <SelectItem value="ARCHIVED_COMPLETED">
-                          Завершенные
-                        </SelectItem>
-                        <SelectItem value="ARCHIVED_CANCELED">
-                          Отмененные
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </section>
+                      Редактировать
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                    >
+                      Удалить
+                    </Button>
+                  </div>
+                )}
+
+                {isEditing ? (
+                  <form onSubmit={handleEditSubmit} className={styles.editForm}>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Название
+                      </label>
+                      <input
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        name="title"
+                        value={editFormData.title}
+                        onChange={handleEditChange}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Описание
+                      </label>
+                      <textarea
+                        className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        name="description"
+                        value={editFormData.description}
+                        onChange={handleEditChange}
+                        required
+                        rows={5}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Стек технологий
+                      </label>
+                      <input
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        name="stack"
+                        value={editFormData.stack}
+                        onChange={handleEditChange}
+                        required
+                      />
+                    </div>
+                    <div className="flex gap-2 justify-end mt-4">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        Отмена
+                      </Button>
+                      <Button type="submit">Сохранить</Button>
+                    </div>
+                  </form>
                 ) : (
-                  data.status && (
-                    <section className={styles.section}>
-                      <h3 className={styles.sectionTitle}>Статус</h3>
-                      <p className={styles.text}>{data.status}</p>
-                    </section>
-                  )
-                )}
-
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Автор</h3>
-                  <p className={styles.text}>{data.author}</p>
-                </section>
-
-                {data.mentors && (
-                  <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>Менторы</h3>
-                    <p className={styles.text}>{data.mentors}</p>
-                  </section>
-                )}
-
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Описание</h3>
-                  <p className={styles.text}>{data.description}</p>
-                </section>
-
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Семестр</h3>
-                  <p className={styles.text}>{data.semester}</p>
-                </section>
-
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Стек технологий</h3>
-                  <p className={styles.text}>{data.stack}</p>
-                </section>
-
-                {data.teamSize && (
-                  <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>
-                      Требуемый размер команды
-                    </h3>
-                    <p className={styles.text}>{data.teamSize}</p>
-                  </section>
-                )}
-
-                {data.teamName && (
-                  <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>Команда</h3>
-                    <p className={styles.text}>{data.teamName}</p>
-                    {data.teamMembers && data.teamMembers.length > 0 && (
-                      <ul className={styles.goalsList}>
-                        {data.teamMembers.map((member, idx) => (
-                          <li key={idx} className={styles.goalsItem}>
-                            {member}
-                          </li>
-                        ))}
-                      </ul>
+                  <>
+                    {isOwner ? (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Статус проекта</h3>
+                        <Select
+                          value={data.rawStatus}
+                          onValueChange={handleStatusChange}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Выберите статус" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="VOTING">Голосование</SelectItem>
+                            <SelectItem value="APPROVED">Принятые</SelectItem>
+                            <SelectItem value="IN_PROGRESS">
+                              В процессе
+                            </SelectItem>
+                            <SelectItem value="ARCHIVED_COMPLETED">
+                              Завершенные
+                            </SelectItem>
+                            <SelectItem value="ARCHIVED_CANCELED">
+                              Отмененные
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </section>
+                    ) : (
+                      data.status && (
+                        <section className={styles.section}>
+                          <h3 className={styles.sectionTitle}>Статус</h3>
+                          <p className={styles.text}>{data.status}</p>
+                        </section>
+                      )
                     )}
-                  </section>
-                )}
 
-                {data.grade !== undefined && data.grade > 0 && (
-                  <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>Оценка</h3>
-                    <p className={styles.text}>{data.grade}/100</p>
-                  </section>
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Автор</h3>
+                      <p className={styles.text}>{data.author}</p>
+                    </section>
+
+                    {data.mentors && (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Менторы</h3>
+                        <p className={styles.text}>{data.mentors}</p>
+                      </section>
+                    )}
+
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Описание</h3>
+                      <p className={styles.text}>{data.description}</p>
+                    </section>
+
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Семестр</h3>
+                      <p className={styles.text}>{data.semester}</p>
+                    </section>
+
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Стек технологий</h3>
+                      <p className={styles.text}>{data.stack}</p>
+                    </section>
+
+                    {data.teamSize && (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>
+                          Требуемый размер команды
+                        </h3>
+                        <p className={styles.text}>{data.teamSize}</p>
+                      </section>
+                    )}
+
+                    {data.teams && data.teams.length > 0 ? (
+                      data.teams.map((team, idx) => (
+                        <section key={idx} className={styles.section}>
+                          <h3 className={styles.sectionTitle}>
+                            Команда: {team.name}
+                            {onGradeTeam && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className={styles.teamGradeButton}
+                                onClick={() => onGradeTeam(team.id)}
+                              >
+                                Оценить
+                              </Button>
+                            )}
+                          </h3>
+                          {team.members && team.members.length > 0 && (
+                            <ul className={styles.goalsList}>
+                              {team.members.map((member, mIdx) => (
+                                <li key={mIdx} className={styles.goalsItem}>
+                                  {member}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {team.grade !== undefined && team.grade > 0 && (
+                            <p className={styles.text}>
+                              Оценка: {(team.grade ?? 0).toFixed(2)}/100
+                            </p>
+                          )}
+                        </section>
+                      ))
+                    ) : data.teamName ? (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>
+                          Команда
+                          {onGradeTeam &&
+                            data.teamMembers && ( // Assuming if there is teamName, we might want to grade, but we need ID. data.teamName doesn't have ID usually in old structure.
+                              // We might need to rely on passed team ID or structure.
+                              // If only teamName is present and no ID, we can't grade.
+                              // Let's assume for now we only show grade button if we have teams array with IDs.
+                              <></>
+                            )}
+                        </h3>
+                        <p className={styles.text}>{data.teamName}</p>
+                        {data.teamMembers && data.teamMembers.length > 0 && (
+                          <ul className={styles.goalsList}>
+                            {data.teamMembers.map((member, idx) => (
+                              <li key={idx} className={styles.goalsItem}>
+                                {member}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </section>
+                    ) : null}
+
+                    {data.grade !== undefined && data.grade > 0 && (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Оценка</h3>
+                        <p className={styles.text}>
+                          {(data.grade ?? 0).toFixed(2)}/100
+                        </p>
+                      </section>
+                    )}
+                  </>
                 )}
               </div>
 

@@ -71,7 +71,7 @@ export const GradesListModal = ({
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <span className="font-bold text-lg mr-2">
-                      {grade.score}/10
+                      {grade.score}/100
                     </span>
                     <span className="text-sm text-gray-500">
                       от {grade.authorName || grade.evaluatorName}

@@ -48,6 +48,19 @@
   margin-bottom: 0.5rem;
 }
 
+.grade {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #dcfce7;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #16a34a;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
 .mentor {
   font-size: 0.9375rem;
   color: #4b5563;

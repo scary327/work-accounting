@@ -63,6 +63,7 @@ export interface ProjectHistoryItem {
   assignedAt: string;
   unassignedAt: string | null;
   isActive: boolean;
+  averageGrade?: number;
 }
 
 export interface StudentDetailsResponse {

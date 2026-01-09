@@ -60,7 +60,7 @@ export const GradeTeamModal = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              Оценка (0-10)
+              Оценка (0-100)
             </label>
             <Input
               type="number"
@@ -68,7 +68,7 @@ export const GradeTeamModal = ({
               value={formData.score}
               onChange={handleChange}
               min="0"
-              max="10"
+              max="100"
               required
             />
           </div>

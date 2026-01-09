@@ -47,7 +47,7 @@ export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
               variant={project.grade >= 80 ? "default" : "secondary"}
               className={styles.cardGrade}
             >
-              {project.grade}/100
+              {project.grade.toFixed(2)}/100
             </Badge>
           </div>
 

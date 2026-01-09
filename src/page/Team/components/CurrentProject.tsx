@@ -15,6 +15,7 @@ interface CurrentProjectProps {
     title: string;
     mentors: TeamParticipant[];
     techStack: string;
+    averageGrade?: number | null;
   } | null;
 }
 
@@ -60,6 +61,13 @@ export const CurrentProject = memo(({ project }: CurrentProjectProps) => {
             Наставники: {project.mentors.map((m) => m.fio).join(", ")}
           </div>
           <div className={styles.stack}>{project.techStack}</div>
+          {project.averageGrade !== undefined &&
+            project.averageGrade !== null &&
+            project.averageGrade > 0 && (
+              <div className={styles.grade}>
+                🏆 Текущая оценка: {project.averageGrade.toFixed(2)}
+              </div>
+            )}
         </motion.div>
       </CardContent>
     </Card>

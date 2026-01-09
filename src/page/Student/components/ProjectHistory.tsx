@@ -68,6 +68,16 @@ export const ProjectHistory = ({
                   ? new Date(project.unassignedAt).toLocaleDateString()
                   : "..."}
               </div>
+              {project.averageGrade !== undefined &&
+                project.averageGrade !== null &&
+                project.averageGrade > 0 && (
+                  <div className={styles.grade}>
+                    🏆 Оценка:{" "}
+                    <span className={styles.gradeValue}>
+                      {project.averageGrade.toFixed(2)}
+                    </span>
+                  </div>
+                )}
             </motion.div>
           ))}
         </motion.div>
