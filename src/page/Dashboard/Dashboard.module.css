@@ -16,16 +16,13 @@
 }
 
 .calendarSection {
-  flex: 0 0 400px; /* Fixed width for calendar */
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .notesSection {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
+  display: none;
 }
 
 /* Responsive design */

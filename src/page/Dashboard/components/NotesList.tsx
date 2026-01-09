@@ -2,6 +2,7 @@ import { useMemo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import styles from "./NotesList.module.css";
+import type { CalendarEvent } from "../../../lib/calendarUtils";
 
 interface Task {
   id: string;
@@ -9,86 +10,34 @@ interface Task {
   date: Date;
   type: "deadline" | "meeting" | "review";
   time?: string;
+  description?: string;
 }
 
-const generateMockTasks = (): Task[] => {
-  const tasks: Task[] = [];
-  const today = new Date();
+interface NotesListProps {
+  events?: CalendarEvent[];
+}
 
-  // Helper to add days
-  const addDays = (date: Date, days: number) => {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-  };
+export const NotesList = ({ events = [] }: NotesListProps) => {
+  const tasks = useMemo(() => {
+    // Convert calendar events to Task structure
+    return events
+      .map((event) => ({
+        id: event.id,
+        title: event.title,
+        date: event.start,
+        // Simple heuristic for type, can be improved or removed
+        type: "meeting" as const,
+        time: event.allDay
+          ? "Весь день"
+          : event.start.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+        description: event.description,
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [events]);
 
-  // Past tasks
-  tasks.push({
-    id: "p1",
-    title: "Ревью кода: Команда Alpha",
-    date: addDays(today, -2),
-    type: "review",
-    time: "14:00",
-  });
-  tasks.push({
-    id: "p2",
-    title: "Сдача спринта: Команда Beta",
-    date: addDays(today, -1),
-    type: "deadline",
-    time: "18:00",
-  });
-
-  // Today's tasks
-  tasks.push({
-    id: "t1",
-    title: "Дейли митинг",
-    date: today,
-    type: "meeting",
-    time: "10:00",
-  });
-  tasks.push({
-    id: "t2",
-    title: "Проверка отчетов",
-    date: today,
-    type: "review",
-    time: "16:30",
-  });
-
-  // Future tasks
-  tasks.push({
-    id: "f1",
-    title: "Презентация проекта",
-    date: addDays(today, 1),
-    type: "meeting",
-    time: "11:00",
-  });
-  tasks.push({
-    id: "f2",
-    title: "Дедлайн по документации",
-    date: addDays(today, 2),
-    type: "deadline",
-    time: "23:59",
-  });
-  tasks.push({
-    id: "f3",
-    title: "Встреча с менторами",
-    date: addDays(today, 3),
-    type: "meeting",
-    time: "15:00",
-  });
-  tasks.push({
-    id: "f4",
-    title: "Ревью архитектуры",
-    date: addDays(today, 5),
-    type: "review",
-    time: "13:00",
-  });
-
-  return tasks;
-};
-
-export const NotesList = () => {
-  const tasks = useMemo(() => generateMockTasks(), []);
   const todayRef = useRef<HTMLDivElement>(null);
 
   // Group tasks by date string
