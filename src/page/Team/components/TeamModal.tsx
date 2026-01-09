@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal } from "../../../components/ui/modal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
+import type { NotificationType } from "../../../components/Notification";
 import type {
   CreateTeamRequest,
   UpdateTeamRequest,
@@ -14,6 +15,7 @@ interface TeamModalProps {
   onClose: () => void;
   team?: Team | null; // For editing
   onSuccess: () => void;
+  addNotification: (message: string, type?: NotificationType) => void;
 }
 
 export const TeamModal = ({
@@ -21,23 +23,21 @@ export const TeamModal = ({
   onClose,
   team,
   onSuccess,
+  addNotification,
 }: TeamModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
   });
 
   useEffect(() => {
     if (team) {
       setFormData({
         name: team.name,
-        description: "", // Description is not in the Team interface used for list, might need to fetch or just leave empty
       });
     } else {
       setFormData({
         name: "",
-        description: "",
       });
     }
   }, [team, isOpen]);
@@ -56,21 +56,31 @@ export const TeamModal = ({
       if (team) {
         const updateData: UpdateTeamRequest = {
           name: formData.name,
-          description: formData.description,
+          description: "",
         };
         await teamsApi.updateTeam(team.id, updateData);
+
+        addNotification(
+          `Команда "${formData.name}" успешно обновлена`,
+          "success"
+        );
       } else {
         const createData: CreateTeamRequest = {
           name: formData.name,
-          description: formData.description,
+          description: "",
           participantIds: [],
         };
         await teamsApi.createTeam(createData);
+        addNotification(
+          `Команда "${formData.name}" успешно создана`,
+          "success"
+        );
       }
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Failed to save team:", error);
+      addNotification("Ошибка при сохранении команды", "error");
     } finally {
       setIsLoading(false);
     }
@@ -91,16 +101,6 @@ export const TeamModal = ({
               onChange={handleChange}
               required
               placeholder="Команда Alpha"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Описание</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-              placeholder="Описание команды..."
             />
           </div>
           <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">

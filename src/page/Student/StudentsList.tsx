@@ -12,6 +12,8 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
+import { NotificationContainer } from "../../components/Notification";
+import { useNotifications } from "../../hooks/useNotifications";
 import { StudentModal } from "./components/StudentModal";
 import { AddToTeamModal } from "./components/AddToTeamModal";
 import styles from "./StudentsList.module.css";
@@ -37,22 +39,25 @@ export const StudentsList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] =
     useState<ParticipantResponse | null>(null);
-  
+
   const [addToTeamModalOpen, setAddToTeamModalOpen] = useState(false);
   const [selectedStudentForTeam, setSelectedStudentForTeam] = useState<{
     id: number;
     name: string;
   } | null>(null);
 
-  const fetchStudents = async () => {
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
+
+  const fetchStudents = async (showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const response = await studentApi.getParticipants({ size: 100 });
       setStudents(response.content);
     } catch (error) {
       console.error("Failed to fetch students", error);
     } finally {
-      setIsLoading(false);
+      if (showLoading) setIsLoading(false);
     }
   };
 
@@ -81,7 +86,10 @@ export const StudentsList = () => {
     setIsModalOpen(true);
   };
 
-  const handleAddToTeam = (student: ParticipantResponse, e: React.MouseEvent) => {
+  const handleAddToTeam = (
+    student: ParticipantResponse,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation();
     setSelectedStudentForTeam({
       id: student.id,
@@ -91,17 +99,19 @@ export const StudentsList = () => {
   };
 
   const handleModalSuccess = () => {
-    fetchStudents();
+    fetchStudents(false);
     setIsModalOpen(false);
   };
 
   const handleAddToTeamSuccess = () => {
     // Optionally refresh students if team info is displayed
-    fetchStudents();
+    fetchStudents(false);
   };
 
   const getFio = (student: ParticipantResponse) => {
-    return `${student.lastName} ${student.firstName} ${student.middleName || ""}`.trim();
+    return `${student.lastName} ${student.firstName} ${
+      student.middleName || ""
+    }`.trim();
   };
 
   return (
@@ -187,6 +197,7 @@ export const StudentsList = () => {
         onClose={() => setIsModalOpen(false)}
         student={editingStudent}
         onSuccess={handleModalSuccess}
+        addNotification={addNotification}
       />
 
       <AddToTeamModal
@@ -196,6 +207,11 @@ export const StudentsList = () => {
         studentName={selectedStudentForTeam?.name || ""}
         teams={teams}
         onSuccess={handleAddToTeamSuccess}
+        addNotification={addNotification}
+      />
+      <NotificationContainer
+        notifications={notifications}
+        onClose={removeNotification}
       />
     </div>
   );

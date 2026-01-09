@@ -12,6 +12,8 @@ const buttonVariants = cva(
         primary: "bg-blue-500 text-white hover:bg-blue-600",
         outline: "border border-input bg-white hover:bg-gray-50",
         danger: "bg-red-500 text-white hover:bg-red-600",
+        destructive: "bg-red-500 text-white hover:bg-red-600",
+        secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
         ghost: "hover:bg-gray-100 hover:text-gray-900",
       },
       size: {

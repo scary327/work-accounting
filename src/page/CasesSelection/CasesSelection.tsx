@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "@reatom/npm-react";
 import { Button } from "../../components/ui/button";
 import { projectsApi } from "../../api";
@@ -39,6 +40,7 @@ export const CasesSelection = () => {
   const [user] = useAtom(userAtom);
   const { notifications, addNotification, removeNotification } =
     useNotifications();
+  const queryClient = useQueryClient();
 
   // Загрузка списка проектов
   const { data: projects = [] } = useProjects({
@@ -202,6 +204,7 @@ export const CasesSelection = () => {
           teamSize: formData.teamSize,
           mentorIds: [], // TODO: Add mentor selection
         });
+        await queryClient.invalidateQueries({ queryKey: ["projects"] });
         addNotification(
           `Кейс "${formData.title}" успешно создан и добавлен в ленту!`,
           "success"
@@ -209,10 +212,18 @@ export const CasesSelection = () => {
         setIsCreateModalOpen(false);
       } catch (error) {
         console.error("Failed to create project:", error);
-        addNotification("Не удалось создать кейс. Попробуйте позже.", "error");
+        const apiError = error as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
+        const errorMessage =
+          apiError?.response?.data?.message ||
+          apiError?.message ||
+          "Не удалось создать кейс. Попробуйте позже.";
+        addNotification(errorMessage, "error");
       }
     },
-    [addNotification]
+    [addNotification, queryClient]
   );
 
   const handleCommentSubmit = useCallback(

@@ -11,6 +11,7 @@ import {
   useUpdateProjectStatus,
 } from "../../api/hooks/useProjects";
 import { useNotifications } from "../../hooks/useNotifications";
+import { NotificationContainer } from "../../components/Notification";
 import { userAtom } from "../../model/user";
 import type {
   SemesterDetailsResponse,
@@ -33,7 +34,8 @@ export const Archive = () => {
     useState<ProjectDetailsResponse | null>(null);
 
   const [user] = useAtom(userAtom);
-  const { addNotification } = useNotifications();
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
   const updateStatusMutation = useUpdateProjectStatus();
 
   const searchValue = getParam("query") || "";
@@ -292,6 +294,10 @@ export const Archive = () => {
               }
             : undefined
         }
+      />
+      <NotificationContainer
+        notifications={notifications}
+        onClose={removeNotification}
       />
     </div>
   );

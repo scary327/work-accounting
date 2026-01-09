@@ -33,9 +33,11 @@ export const Semesters = () => {
   const handleCreate = async (data: Omit<Semester, "id" | "isActive">) => {
     try {
       await createMutation.mutateAsync(data);
+      addNotification("Семестр успешно создан", "success");
       setIsModalOpen(false);
     } catch (error) {
       console.error("Ошибка при создании семестра:", error);
+      addNotification("Ошибка при создании семестра", "error");
     }
   };
 
@@ -75,8 +77,10 @@ export const Semesters = () => {
   const handleActivate = async (id: number) => {
     try {
       await activateMutation.mutateAsync(id);
+      addNotification("Семестр активирован", "success");
     } catch (error) {
       console.error("Ошибка при активации семестра:", error);
+      addNotification("Ошибка при активации семестра", "error");
     }
   };
 

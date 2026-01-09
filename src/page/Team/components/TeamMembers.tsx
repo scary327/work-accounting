@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -21,6 +22,8 @@ interface TeamMembersProps {
  * TeamMembers component - сетка членов команды с аватарами
  */
 export const TeamMembers = memo(({ members }: TeamMembersProps) => {
+  const navigate = useNavigate();
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -50,6 +53,8 @@ export const TeamMembers = memo(({ members }: TeamMembersProps) => {
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => navigate(`/student/${member.id}`)}
+              style={{ cursor: "pointer" }}
             >
               <div
                 className={`${styles.avatar} ${styles[`avatar-${member.id}`]}`}

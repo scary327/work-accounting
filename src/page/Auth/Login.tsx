@@ -7,6 +7,8 @@ import { URLS } from "../../app/router/urls";
 import { authApi } from "../../api";
 import { tokenManager } from "../../api/tokenManager";
 import { userAtom, isRegisteredAtom } from "../../model/user";
+import { NotificationContainer } from "../../components/Notification";
+import { useNotifications } from "../../hooks/useNotifications";
 import styles from "./Auth.module.css";
 
 export const Login = () => {
@@ -17,6 +19,8 @@ export const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [, setUser] = useAtom(userAtom);
   const [, setIsRegistered] = useAtom(isRegisteredAtom);
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,11 +55,13 @@ export const Login = () => {
         response?: { data?: { message?: string } };
         message?: string;
       };
-      setError(
+      const errorMessage =
         apiError?.response?.data?.message ||
-          apiError?.message ||
-          "Неверный email или пароль"
-      );
+        apiError?.message ||
+        "Неверный email или пароль";
+
+      setError(errorMessage);
+      addNotification(errorMessage, "error");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -179,6 +185,10 @@ export const Login = () => {
             </Link>
           </motion.p>
         </motion.div>
+        <NotificationContainer
+          notifications={notifications}
+          onClose={removeNotification}
+        />
       </motion.div>
     </div>
   );

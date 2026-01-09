@@ -182,6 +182,24 @@ export interface TeamProjectDetails {
   unassignedAt: string | null;
 }
 
+export interface Grade {
+  id?: number;
+  score: number;
+  comment?: string;
+  feedback?: string;
+  evaluatorId?: number;
+  evaluatorName?: string;
+  createdAt?: string;
+
+  // New fields from API
+  projectId?: number;
+  projectTitle?: string;
+  authorId?: number;
+  authorName?: string;
+}
+
+export type GetGradesResponse = Grade[];
+
 export interface Team {
   id: number;
   name: string;

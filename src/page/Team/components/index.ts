@@ -2,3 +2,8 @@ export { TeamHeader } from "./TeamHeader";
 export { TeamMembers } from "./TeamMembers";
 export { CurrentProject } from "./CurrentProject";
 export { ProjectHistory } from "./ProjectHistory";
+export { TeamModal } from "./TeamModal";
+export { AssignProjectModal } from "./AssignProjectModal";
+export { GradeTeamModal } from "./GradeTeamModal";
+export { AddParticipantModal } from "./AddParticipantModal";
+export { GradesListModal } from "./GradesListModal";

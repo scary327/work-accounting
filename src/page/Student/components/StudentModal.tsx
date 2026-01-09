@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal } from "../../../components/ui/modal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
+import type { NotificationType } from "../../../components/Notification";
 import type {
   CreateParticipantRequest,
   ParticipantResponse,
@@ -13,6 +14,7 @@ interface StudentModalProps {
   onClose: () => void;
   student?: ParticipantResponse | null; // For editing
   onSuccess: (student: ParticipantResponse) => void;
+  addNotification: (message: string, type?: NotificationType) => void;
 }
 
 export const StudentModal = ({
@@ -20,6 +22,7 @@ export const StudentModal = ({
   onClose,
   student,
   onSuccess,
+  addNotification,
 }: StudentModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<CreateParticipantRequest>({
@@ -64,12 +67,16 @@ export const StudentModal = ({
       let result;
       if (student) {
         result = await studentApi.updateParticipant(student.id, formData);
+        addNotification("Данные студента обновлены", "success");
       } else {
         result = await studentApi.createParticipant(formData);
+        addNotification("Студент успешно создан", "success");
       }
       onSuccess(result);
       onClose();
     } catch (error) {
+      console.error("Failed to save student:", error);
+      addNotification("Ошибка при сохранении студента", "error");
       console.error("Failed to save student:", error);
       // Handle error (e.g., show toast)
     } finally {

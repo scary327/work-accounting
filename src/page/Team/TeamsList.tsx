@@ -12,6 +12,8 @@ import {
 } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
+import { NotificationContainer } from "../../components/Notification";
+import { useNotifications } from "../../hooks/useNotifications";
 import { TeamModal } from "./components/TeamModal";
 import styles from "./TeamsList.module.css";
 
@@ -35,9 +37,12 @@ export const TeamsList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
 
-  const fetchTeams = async () => {
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
+
+  const fetchTeams = async (showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const response = await teamsApi.getTeams({
         page: 0,
         size: 100, // Fetch enough teams for now
@@ -46,7 +51,7 @@ export const TeamsList = () => {
     } catch (error) {
       console.error("Failed to fetch teams:", error);
     } finally {
-      setIsLoading(false);
+      if (showLoading) setIsLoading(false);
     }
   };
 
@@ -66,7 +71,7 @@ export const TeamsList = () => {
   };
 
   const handleModalSuccess = () => {
-    fetchTeams();
+    fetchTeams(false);
   };
 
   const getInitials = (name: string) => {
@@ -189,6 +194,11 @@ export const TeamsList = () => {
         onClose={() => setIsModalOpen(false)}
         team={editingTeam}
         onSuccess={handleModalSuccess}
+        addNotification={addNotification}
+      />
+      <NotificationContainer
+        notifications={notifications}
+        onClose={removeNotification}
       />
     </div>
   );

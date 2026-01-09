@@ -9,7 +9,8 @@ import styles from "./Auth.module.css";
 
 export const Registration = () => {
   const navigate = useNavigate();
-  const { notifications, addNotification } = useNotifications();
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -267,6 +268,10 @@ export const Registration = () => {
           </motion.p>
         </motion.div>
       </motion.div>
+      <NotificationContainer
+        notifications={notifications}
+        onClose={removeNotification}
+      />
     </div>
   );
 };

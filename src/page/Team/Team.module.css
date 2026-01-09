@@ -30,3 +30,32 @@
     padding: 0.75rem;
   }
 }
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 0 4px;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+}
+

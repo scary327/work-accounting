@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import { teamsApi } from "../../../api/teamsApi";
+import type { NotificationType } from "../../../components/Notification";
 import type { Team } from "../../../api/types";
 
 interface AddToTeamModalProps {
@@ -18,6 +18,7 @@ interface AddToTeamModalProps {
   studentName: string;
   teams: Team[];
   onSuccess: () => void;
+  addNotification: (message: string, type?: NotificationType) => void;
 }
 
 export const AddToTeamModal = ({
@@ -27,6 +28,7 @@ export const AddToTeamModal = ({
   studentName,
   teams,
   onSuccess,
+  addNotification,
 }: AddToTeamModalProps) => {
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,12 +37,12 @@ export const AddToTeamModal = ({
     if (!studentId || !selectedTeamId) return;
 
     try {
-      setIsSubmitting(true);
-      await teamsApi.addParticipant(selectedTeamId, studentId);
+      addNotification(`Студент добавлен в команду`, "success");
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Failed to add student to team", error);
+      addNotification("Не удалось добавить студента в команду", "error");
     } finally {
       setIsSubmitting(false);
     }

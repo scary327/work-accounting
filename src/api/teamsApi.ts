@@ -8,6 +8,7 @@ import type {
   GradeTeamRequest,
   GetTeamsRequest,
   PaginatedResponse,
+  GetGradesResponse,
 } from "./types";
 
 export const teamsApi = {
@@ -41,7 +42,7 @@ export const teamsApi = {
     id: number | string,
     data: AssignProjectRequest
   ): Promise<void> => {
-    await apiClient.post(`/teams/${id}/projects`, data);
+    await apiClient.post(`/teams/${id}/project`, data);
   },
 
   addParticipant: async (
@@ -70,6 +71,23 @@ export const teamsApi = {
     evaluationId: number | string
   ): Promise<void> => {
     await apiClient.delete(`/teams/${teamId}/grades/${evaluationId}`);
+  },
+
+  getGrades: async (id: number | string): Promise<GetGradesResponse> => {
+    const response = await apiClient.get<GetGradesResponse>(
+      `/teams/${id}/grades`
+    );
+    return response.data;
+  },
+
+  getProjectGrades: async (
+    teamId: number | string,
+    projectId: number | string
+  ): Promise<GetGradesResponse> => {
+    const response = await apiClient.get<GetGradesResponse>(
+      `/teams/${teamId}/projects/${projectId}/grades`
+    );
+    return response.data;
   },
 
   getTeamDetails: async (id: number | string): Promise<Team> => {
