@@ -1,0 +1,241 @@
+.calendarWrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.calendarContainer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* FullCalendar общие стили */
+:global(.fc) {
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+/* Заголовок календаря */
+:global(.fc-header-toolbar) {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+:global(.fc-toolbar-title) {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* Кнопки в хедере */
+:global(.fc-button) {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  text-transform: capitalize;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+:global(.fc-button:hover) {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+:global(.fc-button-active) {
+  background-color: #2563eb !important;
+  border-color: #1d4ed8 !important;
+  color: white !important;
+}
+
+:global(.fc-button-active:hover) {
+  background-color: #1d4ed8 !important;
+  border-color: #1554b5 !important;
+  color: white !important;
+}
+
+:global(.fc-button-primary:disabled) {
+  background-color: #1d4ed8 !important;
+  border-color: #374151;
+  color: #374151;
+}
+
+:global(.fc-button-primary:not(:disabled)) {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+:global(.fc-button-primary:not(:disabled):hover) {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+:global(.fc-button-primary:not(:disabled).fc-button-active) {
+  background-color: #2563eb !important;
+  border-color: #1d4ed8 !important;
+  color: white !important;
+}
+
+:global(.fc-button-primary:not(:disabled).fc-button-active:hover) {
+  background-color: #1d4ed8 !important;
+  color: white !important;
+}
+
+/* Сетка и ячейки */
+:global(.fc-col-header-cell) {
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+:global(.fc-daygrid-day) {
+  border-color: #e5e7eb;
+  background: #ffffff;
+}
+
+:global(.fc-daygrid-day:hover) {
+  background: #f9fafb;
+}
+
+:global(.fc-daygrid-day.fc-day-other) {
+  background: #fafbfc;
+}
+
+:global(.fc-daygrid-day-number) {
+  padding: 0.5rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+:global(.fc-daygrid-day.fc-day-today) {
+  background: #eff6ff;
+}
+
+:global(.fc-daygrid-day.fc-day-today .fc-daygrid-day-number) {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* События */
+:global(.fc-event) {
+  border: none;
+  background: #2563eb;
+  border-radius: 4px;
+}
+
+:global(.fc-event:hover) {
+  background: #1d4ed8;
+}
+
+:global(.fc-event-title) {
+  padding: 0.25rem 0.5rem;
+  color: white;
+  font-weight: 500;
+  font-size: 0.825rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.fc-daygrid-event) {
+  margin: 1px;
+}
+
+:global(.fc-daygrid-block-event .fc-event-title) {
+  padding: 2px 4px;
+  font-size: 0.75rem;
+}
+
+/* Поп-ап всплывающий */
+:global(.fc-popover) {
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+:global(.fc-popover-header) {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 6px 6px 0 0;
+  padding: 0.75rem 1rem;
+}
+
+/* Временная шкала */
+:global(.fc-timegrid) {
+  border-top: 1px solid #e5e7eb;
+}
+
+:global(.fc-col-time-cell) {
+  padding: 0.5rem;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+:global(.fc-timegrid-slot) {
+  height: 2em;
+}
+
+:global(.fc-timegrid-slot.fc-col-highlight) {
+  background: #eff6ff;
+}
+
+/* Сегодняшний день в временной шкале */
+:global(.fc .fc-today) {
+  background: #eff6ff;
+}
+
+/* Прокрутка контента */
+:global(.fc-scroller) {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Размер для правильного отображения */
+:global(.fc) {
+  height: 100%;
+}
+
+:global(.fc-daygrid) {
+  height: 100%;
+}
+
+:global(.fc-daygrid-body) {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Делаем строки равномерными */
+:global(.fc-daygrid-day-frame) {
+  position: relative;
+  min-height: 100px;
+}
+
+:global(.fc-daygrid-body tr) {
+  height: 1fr;
+}
+
+:global(.fc-event-time) {
+  color: white;
+}
