@@ -9,6 +9,7 @@ import { projectsApi } from "../../api/projectsApi";
 import {
   useProjectComments,
   useUpdateProjectStatus,
+  useVoteProject,
 } from "../../api/hooks/useProjects";
 import { useNotifications } from "../../hooks/useNotifications";
 import { NotificationContainer } from "../../components/Notification";
@@ -48,6 +49,7 @@ export const Archive = () => {
   const { notifications, addNotification, removeNotification } =
     useNotifications();
   const updateStatusMutation = useUpdateProjectStatus();
+  const voteProjectMutation = useVoteProject();
 
   const searchValue = getParam("query") || "";
   const filterValue = getParam("statuses") || "all";
@@ -222,6 +224,57 @@ export const Archive = () => {
     setIsGradesListOpen(true);
   }, []);
 
+  const handleVoteUp = useCallback(
+    async (caseId: string) => {
+      const numId = parseInt(caseId, 10);
+      try {
+        await voteProjectMutation.mutateAsync({ id: numId, value: true });
+        // Refresh project details
+        const details = await projectsApi.getProjectById(numId);
+        setSelectedProjectDetails(details);
+        addNotification("Спасибо за оценку!", "success");
+      } catch (error) {
+        console.error("Ошибка при голосовании:", error);
+        addNotification("Ошибка при голосовании", "error");
+      }
+    },
+    [voteProjectMutation, addNotification]
+  );
+
+  const handleVoteDown = useCallback(
+    async (caseId: string) => {
+      const numId = parseInt(caseId, 10);
+      try {
+        await voteProjectMutation.mutateAsync({ id: numId, value: false });
+        // Refresh project details
+        const details = await projectsApi.getProjectById(numId);
+        setSelectedProjectDetails(details);
+        addNotification("Спасибо за оценку!", "success");
+      } catch (error) {
+        console.error("Ошибка при голосовании:", error);
+        addNotification("Ошибка при голосовании", "error");
+      }
+    },
+    [voteProjectMutation, addNotification]
+  );
+
+  const handleCommentSubmit = useCallback(
+    async (caseId: string, commentText: string) => {
+      const numId = parseInt(caseId, 10);
+      try {
+        await projectsApi.addComment(numId, commentText);
+        // Refresh project details
+        const details = await projectsApi.getProjectById(numId);
+        setSelectedProjectDetails(details);
+        addNotification("Комментарий добавлен!", "success");
+      } catch (error) {
+        console.error("Ошибка при добавлении комментария:", error);
+        addNotification("Ошибка при добавлении комментария", "error");
+      }
+    },
+    [addNotification]
+  );
+
   return (
     <div className={styles.archive}>
       <div className={styles.container}>
@@ -330,6 +383,9 @@ export const Archive = () => {
         onEditProject={handleEditProject}
         onGradeTeam={handleGradeTeamClick}
         onViewGrades={handleViewGradesClick}
+        onVoteUp={handleVoteUp}
+        onVoteDown={handleVoteDown}
+        onCommentSubmit={handleCommentSubmit}
         data={
           selectedProjectDetails
             ? {
@@ -364,8 +420,9 @@ export const Archive = () => {
                   }
                 })(),
                 mentors: (selectedProjectDetails.mentors || [])
-                  .map((m) => m.fullName)
+                  .map((m) => m.fio)
                   .join(", "),
+                mentorsList: selectedProjectDetails.mentors || [],
                 mentorIds: (selectedProjectDetails.mentors || []).map(
                   (m) => m.id
                 ),
@@ -380,6 +437,7 @@ export const Archive = () => {
                 teamName: selectedProjectFromList?.teams?.[0]?.name,
                 teamMembers: selectedProjectFromList?.teams?.[0]?.members,
                 grade: selectedProjectFromList?.teams?.[0]?.averageRating,
+                userVote: selectedProjectDetails.userVote,
               }
             : undefined
         }

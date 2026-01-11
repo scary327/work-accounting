@@ -38,6 +38,7 @@ export interface ProjectInfoModalData {
   status?: string;
   rawStatus?: string;
   mentors?: string;
+  mentorsList?: Array<{ id: number; fio: string }>;
   mentorIds?: number[];
   teamName?: string;
   teamMembers?: string[];
@@ -262,10 +263,9 @@ export const ProjectInfoModal = ({
                 <X className="w-4 h-4" />
               </Button>
             </div>
-
             <div className={styles.body}>
               <div className={styles.left}>
-                {isOwner && !readOnly && !isEditing && (
+                {!readOnly && !isEditing && (
                   <div className={styles.actionButtons}>
                     <Button
                       variant="outline"
@@ -432,12 +432,25 @@ export const ProjectInfoModal = ({
                       <p className={styles.text}>{data.author}</p>
                     </section>
 
-                    <section className={styles.section}>
-                      <h3 className={styles.sectionTitle}>Менторы</h3>
-                      <p className={styles.text}>
-                        {data.mentors || "Не указаны"}
-                      </p>
-                    </section>
+                    {(data.mentorsList && data.mentorsList.length > 0) ||
+                    data.mentors ? (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Менторы</h3>
+                        {data.mentorsList && data.mentorsList.length > 0 ? (
+                          <div className={styles.mentorsList}>
+                            {data.mentorsList.map((m) => (
+                              <div key={m.id} className={styles.mentorItem}>
+                                {m.fio}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className={styles.text}>
+                            {data.mentors || "Не указаны"}
+                          </p>
+                        )}
+                      </section>
+                    ) : null}
 
                     <section className={styles.section}>
                       <h3 className={styles.sectionTitle}>Описание</h3>
@@ -509,25 +522,31 @@ export const ProjectInfoModal = ({
                       ))
                     ) : data.teamName ? (
                       <section className={styles.section}>
-                        <h3 className={styles.sectionTitle}>
-                          Команда
-                          {onGradeTeam &&
-                            data.teamMembers && ( // Assuming if there is teamName, we might want to grade, but we need ID. data.teamName doesn't have ID usually in old structure.
-                              // We might need to rely on passed team ID or structure.
-                              // If only teamName is present and no ID, we can't grade.
-                              // Let's assume for now we only show grade button if we have teams array with IDs.
-                              <></>
-                            )}
-                        </h3>
-                        <p className={styles.text}>{data.teamName}</p>
+                        <h3 className={styles.sectionTitle}>Команда</h3>
+                        <div className={styles.teamNameLabel}>
+                          {data.teamName}
+                        </div>
                         {data.teamMembers && data.teamMembers.length > 0 && (
-                          <ul className={styles.goalsList}>
+                          <div className={styles.teamContainer}>
                             {data.teamMembers.map((member, idx) => (
-                              <li key={idx} className={styles.goalsItem}>
-                                {member}
-                              </li>
+                              <div key={idx} className={styles.teamMember}>
+                                <div className={styles.memberAvatar}>
+                                  {member
+                                    .split(" ")
+                                    .filter((n) => n.length > 0)
+                                    .slice(0, 2)
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .toUpperCase()}
+                                </div>
+                                <div className={styles.memberInfo}>
+                                  <div className={styles.memberName}>
+                                    {member}
+                                  </div>
+                                </div>
+                              </div>
                             ))}
-                          </ul>
+                          </div>
                         )}
                       </section>
                     ) : null}

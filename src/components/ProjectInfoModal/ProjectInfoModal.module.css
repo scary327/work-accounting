@@ -307,5 +307,117 @@
     max-width: 100%;
   }
 }
-.actionButtons { display: flex; gap: 0.5rem; margin-top: 1rem; } .editForm { display: flex; flex-direction: column; gap: 1rem; } .input { padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; } .teamGradeButton { margin-left: 0.5rem; font-size: 0.75rem; padding: 2px 6px; height: auto; }
-.editForm { display: flex; flex-direction: column; gap: 1rem; } .input { padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; }
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.mentorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mentorItem {
+  color: #4b5563;
+  font-size: 0.9375rem;
+  padding: 0.5rem 0.75rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border-left: 3px solid #2563eb;
+}
+
+.teamNameLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #eff6ff;
+  border-left: 3px solid #2563eb;
+  border-radius: 4px;
+}
+
+.teamContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.teamMember {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.teamMember:hover {
+  background: #f3f4f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.memberAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.memberInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.memberName {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.input {
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+}
+.teamGradeButton {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  height: auto;
+}
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.input {
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+}

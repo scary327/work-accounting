@@ -1,16 +1,13 @@
 import { useCallback, useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAtom } from "@reatom/npm-react";
 import { Button } from "../../components/ui/button";
 import { projectsApi } from "../../api";
-import { userAtom } from "../../model/user";
 import {
   useProjects,
   useProjectById,
   useProjectComments,
   useVoteProject,
   useAddComment,
-  useUpdateProjectStatus,
 } from "../../api/hooks/useProjects";
 import { NotificationContainer } from "../../components/Notification";
 import { useNotifications } from "../../hooks/useNotifications";
@@ -30,14 +27,10 @@ import styles from "./CasesSelection.module.css";
 export const CasesSelection = () => {
   const [selectedCaseId, setSelectedCaseId] = useState<number | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [userVotes, setUserVotes] = useState<
-    Record<number, "up" | "down" | null>
-  >({});
   const [selectedModalData, setSelectedModalData] = useState<
     CaseModalData | undefined
   >();
 
-  const [user] = useAtom(userAtom);
   const { notifications, addNotification, removeNotification } =
     useNotifications();
   const queryClient = useQueryClient();
@@ -60,7 +53,6 @@ export const CasesSelection = () => {
   // Мутации для голосования и комментариев
   const voteProjectMutation = useVoteProject();
   const addCommentMutation = useAddComment();
-  const updateStatusMutation = useUpdateProjectStatus();
 
   // Обновление данных модалки при загрузке деталей проекта
   useEffect(() => {
@@ -128,20 +120,14 @@ export const CasesSelection = () => {
   const handleVoteUp = useCallback(
     async (caseId: string) => {
       const numId = parseInt(caseId, 10);
-      const currentVote = userVotes[numId];
-      const newVote = currentVote === "up" ? null : true;
 
       try {
-        await voteProjectMutation.mutateAsync({ id: numId, value: newVote });
-        setUserVotes((prev) => ({
-          ...prev,
-          [numId]: newVote ? "up" : null,
-        }));
+        await voteProjectMutation.mutateAsync({ id: numId, value: true });
         // Обновляем selectedModalData если это выбранный случай
         if (selectedCaseId === numId && selectedModalData) {
           setSelectedModalData({
             ...selectedModalData,
-            userVote: newVote,
+            userVote: true,
           });
         }
       } catch (error) {
@@ -149,32 +135,20 @@ export const CasesSelection = () => {
         addNotification("Ошибка при голосовании", "error");
       }
     },
-    [
-      userVotes,
-      voteProjectMutation,
-      addNotification,
-      selectedCaseId,
-      selectedModalData,
-    ]
+    [voteProjectMutation, addNotification, selectedCaseId, selectedModalData]
   );
 
   const handleVoteDown = useCallback(
     async (caseId: string) => {
       const numId = parseInt(caseId, 10);
-      const currentVote = userVotes[numId];
-      const newVote = currentVote === "down" ? null : false;
 
       try {
-        await voteProjectMutation.mutateAsync({ id: numId, value: newVote });
-        setUserVotes((prev) => ({
-          ...prev,
-          [numId]: newVote !== null ? "down" : null,
-        }));
+        await voteProjectMutation.mutateAsync({ id: numId, value: false });
         // Обновляем selectedModalData если это выбранный случай
         if (selectedCaseId === numId && selectedModalData) {
           setSelectedModalData({
             ...selectedModalData,
-            userVote: newVote,
+            userVote: false,
           });
         }
       } catch (error) {
@@ -182,13 +156,7 @@ export const CasesSelection = () => {
         addNotification("Ошибка при голосовании", "error");
       }
     },
-    [
-      userVotes,
-      voteProjectMutation,
-      addNotification,
-      selectedCaseId,
-      selectedModalData,
-    ]
+    [voteProjectMutation, addNotification, selectedCaseId, selectedModalData]
   );
 
   const handleCreateCase = useCallback(
@@ -244,23 +212,6 @@ export const CasesSelection = () => {
       }
     },
     [addCommentMutation, addNotification]
-  );
-
-  const handleStatusChange = useCallback(
-    async (caseId: string, status: string) => {
-      const numId = parseInt(caseId, 10);
-      try {
-        await updateStatusMutation.mutateAsync({ id: numId, status });
-        addNotification("Статус проекта обновлен", "success");
-        if (selectedModalData) {
-          setSelectedModalData({ ...selectedModalData, status });
-        }
-      } catch (error) {
-        console.error("Failed to update status:", error);
-        addNotification("Не удалось обновить статус", "error");
-      }
-    },
-    [updateStatusMutation, addNotification, selectedModalData]
   );
 
   const handleDeleteProject = useCallback(
@@ -343,16 +294,10 @@ export const CasesSelection = () => {
       <CaseModal
         isOpen={selectedCaseId !== null}
         data={selectedModalData}
-        isOwner={
-          !!user &&
-          !!projectDetails &&
-          String(user.id) === String(projectDetails.creatorId)
-        }
         onClose={() => setSelectedCaseId(null)}
         onVoteUp={handleVoteUp}
         onVoteDown={handleVoteDown}
         onCommentSubmit={handleCommentSubmit}
-        onStatusChange={handleStatusChange}
         onDeleteProject={handleDeleteProject}
         onEditProject={handleEditProject}
       />

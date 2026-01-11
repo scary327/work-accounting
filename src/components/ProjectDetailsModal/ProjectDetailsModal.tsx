@@ -73,38 +73,55 @@ export const ProjectDetailsModal = ({
           transition={{ delay: 0.1 }}
         >
           <h3 className={styles.sectionTitle}>Команда</h3>
-          <div className={styles.detailText}>
+          <div className={styles.teamNameLabel}>
             {data.teamId ? (
               <Link to={`/team/${data.teamId}`} className={styles.teamLink}>
                 {data.teamName}
               </Link>
             ) : (
-              <p className={styles.teamLink}>{data.teamName}</p>
+              <p>{data.teamName}</p>
             )}
           </div>
-          <div className={styles.studentsList}>
+          <div className={styles.teamContainer}>
             {data.teamMembers.map((member, idx) => (
-              <span key={idx} className={styles.studentLink}>
-                • {member}
-              </span>
+              <div key={idx} className={styles.teamMember}>
+                <div className={styles.memberAvatar}>
+                  {member
+                    .split(" ")
+                    .filter((n) => n.length > 0)
+                    .slice(0, 2)
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()}
+                </div>
+                <div className={styles.memberInfo}>
+                  <div className={styles.memberName}>{member}</div>
+                </div>
+              </div>
             ))}
           </div>
         </motion.div>
 
-        {/* Mentor and description */}
+        {/* Mentor */}
         <motion.div
           className={styles.section}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <h3 className={styles.sectionTitle}>Автор и описание</h3>
-          <div className={styles.detailText}>
-            <strong>Наставник:</strong> {data.mentor}
-            <br />
-            <br />
-            {data.description}
-          </div>
+          <h3 className={styles.sectionTitle}>Автор проекта</h3>
+          <div className={styles.detailText}>{data.mentor}</div>
+        </motion.div>
+
+        {/* Description */}
+        <motion.div
+          className={styles.section}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className={styles.sectionTitle}>Описание</h3>
+          <div className={styles.detailText}>{data.description}</div>
         </motion.div>
 
         {/* Tech Stack */}
@@ -112,7 +129,7 @@ export const ProjectDetailsModal = ({
           className={styles.section}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.25 }}
         >
           <h3 className={styles.sectionTitle}>Стек технологий</h3>
           <div className={styles.detailText}>{data.stack.join(", ")}</div>
@@ -123,7 +140,7 @@ export const ProjectDetailsModal = ({
           className={styles.section}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: 0.3 }}
         >
           <h3 className={styles.sectionTitle}>Результаты и оценки</h3>
           <div className={styles.checkpointList}>
@@ -133,7 +150,7 @@ export const ProjectDetailsModal = ({
                 className={styles.checkpointItem}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + idx * 0.05 }}
+                transition={{ delay: 0.35 + idx * 0.05 }}
               >
                 <div className={styles.checkpointHeader}>
                   <span className={styles.checkpointTitle}>
@@ -156,7 +173,7 @@ export const ProjectDetailsModal = ({
               className={styles.finalGrade}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + data.checkpoints.length * 0.05 }}
+              transition={{ delay: 0.35 + data.checkpoints.length * 0.05 }}
             >
               <div className={styles.checkpointHeader}>
                 <span className={styles.checkpointTitle}>Итоговая оценка</span>

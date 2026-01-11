@@ -117,7 +117,7 @@ export interface ProjectDetailsResponse {
   userVote: boolean | null;
   mentors: Array<{
     id: number;
-    fullName: string;
+    fio: string;
   }>;
 }
 

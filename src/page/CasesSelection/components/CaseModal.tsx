@@ -6,13 +6,6 @@ import { type UserDto } from "../../../api/usersApi";
 import { useUsers } from "../../../api/hooks/useUsers";
 import { Badge } from "../../../components/ui/badge";
 import { Input } from "../../../components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 import styles from "./CaseModal.module.css";
 
 export interface Comment {
@@ -35,18 +28,16 @@ export interface CaseModalData {
   userVote?: boolean | null;
   status?: string;
   mentorIds?: number[];
-  mentors?: { id: number; fullName: string }[];
+  mentors?: { id: number; fio: string }[];
 }
 
 interface CaseModalProps {
   isOpen: boolean;
   data?: CaseModalData;
-  isOwner?: boolean;
   onClose: () => void;
   onVoteUp?: (caseId: string) => void;
   onVoteDown?: (caseId: string) => void;
   onCommentSubmit?: (caseId: string, comment: string) => void;
-  onStatusChange?: (caseId: string, status: string) => void;
   onDeleteProject?: (caseId: string) => void;
   onEditProject?: (
     caseId: string,
@@ -72,12 +63,10 @@ const modalVariants = {
 export const CaseModal = ({
   isOpen,
   data,
-  isOwner,
   onClose,
   onVoteUp,
   onVoteDown,
   onCommentSubmit,
-  onStatusChange,
   onDeleteProject,
   onEditProject,
 }: CaseModalProps) => {
@@ -89,7 +78,7 @@ export const CaseModal = ({
   });
 
   // Use cached users query
-  const { data: users = [] } = useUsers(isOpen && !!isOwner);
+  const { data: users = [] } = useUsers(isOpen && isEditing);
   const [selectedMentors, setSelectedMentors] = useState<UserDto[]>([]);
   const [mentorSearch, setMentorSearch] = useState("");
 
@@ -106,15 +95,15 @@ export const CaseModal = ({
 
   // Update selected mentors when users are loaded or modal opens
   useEffect(() => {
-    if (isOpen && isOwner && users.length > 0 && data?.mentorIds) {
+    if (isOpen && isEditing && users.length > 0 && data?.mentorIds) {
       const initialMentors = users.filter((user) =>
         data.mentorIds?.includes(user.id)
       );
       setSelectedMentors(initialMentors);
-    } else if (isOpen && isOwner && users.length > 0 && !data?.mentorIds) {
+    } else if (isOpen && isEditing && users.length > 0 && !data?.mentorIds) {
       setSelectedMentors([]);
     }
-  }, [isOpen, isOwner, users, data?.mentorIds]);
+  }, [isOpen, isEditing, users, data?.mentorIds]);
 
   useEffect(() => {
     if (isOpen) {
@@ -191,12 +180,6 @@ export const CaseModal = ({
     }
   };
 
-  const handleStatusChange = (value: string) => {
-    if (data && onStatusChange && value !== data.status) {
-      onStatusChange(data.id, value);
-    }
-  };
-
   console.log(data);
 
   return (
@@ -230,7 +213,7 @@ export const CaseModal = ({
 
             <div className={styles.body}>
               <div className={styles.left}>
-                {isOwner && !isEditing && (
+                {!isEditing && (
                   <div className="flex gap-2 mb-4">
                     <Button
                       variant="outline"
@@ -366,43 +349,26 @@ export const CaseModal = ({
                   </form>
                 ) : (
                   <>
-                    {isOwner && (
+                    <section className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Автор проекта</h3>
+                      <p className={styles.text}>{data.author}</p>
+                    </section>
+
+                    {data.mentors && data.mentors.length > 0 && (
                       <section className={styles.section}>
-                        <h3 className={styles.sectionTitle}>Статус проекта</h3>
-                        <Select
-                          value={data.status}
-                          onValueChange={handleStatusChange}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Выберите статус" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="VOTING">Голосование</SelectItem>
-                            <SelectItem value="APPROVED">Принятые</SelectItem>
-                            <SelectItem value="IN_PROGRESS">
-                              В процессе
-                            </SelectItem>
-                            <SelectItem value="ARCHIVED_COMPLETED">
-                              Завершенные
-                            </SelectItem>
-                            <SelectItem value="ARCHIVED_CANCELED">
-                              Отмененные
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <h3 className={styles.sectionTitle}>Менторы</h3>
+                        <div className={styles.mentorsList}>
+                          {data.mentors.map((m) => {
+                            const mentorName = m.fio || "";
+                            return (
+                              <div key={m.id} className={styles.mentorItem}>
+                                {mentorName}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </section>
                     )}
-
-                    <section className={styles.section}>
-                      <h3 className={styles.sectionTitle}>Менторы</h3>
-                      {data.mentors && data.mentors.length > 0 ? (
-                        <p className={styles.text}>
-                          {data.mentors.map((m) => m.fullName).join(", ")}
-                        </p>
-                      ) : (
-                        <p className={styles.text}>{data.author}</p>
-                      )}
-                    </section>
 
                     <section className={styles.section}>
                       <h3 className={styles.sectionTitle}>Описание</h3>

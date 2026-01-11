@@ -52,7 +52,6 @@ export const GradesListModal = ({
   }, [isOpen, fetchGrades]);
 
   const handleDelete = async (gradeId: number) => {
-    if (!window.confirm("Вы уверены, что хотите удалить эту оценку?")) return;
     try {
       await teamsApi.deleteGrade(teamId, gradeId);
       addNotification("Оценка удалена", "success");
@@ -64,6 +63,18 @@ export const GradesListModal = ({
     }
   };
 
+  // Group grades by project
+  const groupedGrades = grades.reduce((acc, grade) => {
+    const projectKey = grade.projectTitle || "Без проекта";
+    if (!acc[projectKey]) {
+      acc[projectKey] = [];
+    }
+    acc[projectKey].push(grade);
+    return acc;
+  }, {} as Record<string, Grade[]>);
+
+  const projectNames = Object.keys(groupedGrades).sort();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="bg-white p-6 rounded-lg w-full max-w-2xl m-auto max-h-[80vh] overflow-y-auto">
@@ -74,51 +85,58 @@ export const GradesListModal = ({
         ) : grades.length === 0 ? (
           <div className="text-center text-gray-500 py-4">Нет оценок</div>
         ) : (
-          <div className="space-y-4">
-            {grades.map((grade, index) => (
-              <div
-                key={grade.id || index}
-                className="border p-4 rounded-md bg-gray-50 relative group"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <span className="font-bold text-lg mr-2">
-                      {grade.score}/100
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      от {grade.authorName || grade.evaluatorName}
-                      {grade.createdAt &&
-                        ` (${new Date(grade.createdAt).toLocaleDateString()})`}
-                    </span>
-                  </div>
-                  {grade.id ? (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="ml-2"
-                      onClick={() => handleDelete(grade.id!)}
+          <div className="space-y-6">
+            {projectNames.map((projectName) => (
+              <div key={projectName} className="border-b pb-6 last:border-b-0">
+                <h3 className="text-lg font-semibold text-blue-700 mb-4">
+                  {projectName}
+                </h3>
+                <div className="space-y-3 ml-4">
+                  {groupedGrades[projectName].map((grade, index) => (
+                    <div
+                      key={grade.id || index}
+                      className="border p-3 rounded-md bg-gray-50 relative group"
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Удалить
-                    </Button>
-                  ) : (
-                    /* Fallback for grades without ID (should not happen usually) */
-                    <span className="text-xs text-red-400">Нет ID</span>
-                  )}
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="font-bold text-lg mr-2">
+                            {grade.score}/100
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            от {grade.authorName || grade.evaluatorName}
+                            {grade.createdAt &&
+                              ` (${new Date(
+                                grade.createdAt
+                              ).toLocaleDateString()})`}
+                          </span>
+                        </div>
+                        {grade.id ? (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="ml-2"
+                            onClick={() => handleDelete(grade.id!)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Удалить
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-red-400">Нет ID</span>
+                        )}
+                      </div>
+                      {(grade.feedback || grade.comment) && (
+                        <div className="mt-2">
+                          <span className="font-semibold text-sm block">
+                            Отзыв:
+                          </span>
+                          <p className="text-gray-700 whitespace-pre-wrap text-sm">
+                            {grade.feedback || grade.comment}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                {grade.projectTitle && (
-                  <div className="mb-2 text-sm text-blue-600 font-medium">
-                    Проект: {grade.projectTitle}
-                  </div>
-                )}
-                {(grade.feedback || grade.comment) && (
-                  <div className="mb-2">
-                    <span className="font-semibold text-sm block">Отзыв:</span>
-                    <p className="text-gray-700 whitespace-pre-wrap">
-                      {grade.feedback || grade.comment}
-                    </p>
-                  </div>
-                )}
               </div>
             ))}
           </div>
