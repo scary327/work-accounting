@@ -36,12 +36,28 @@
   transition: all 0.2s ease;
   cursor: pointer;
   border: 2px solid transparent;
+  position: relative;
 }
 
 .card:hover {
   background: #f3f4f6;
   border-color: #2563eb;
   transform: translateY(-2px);
+}
+
+.removeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card:hover .removeButton {
+  opacity: 1;
 }
 
 .avatar {

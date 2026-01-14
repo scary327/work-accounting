@@ -1,12 +1,13 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ThumbsUp, ThumbsDown, Send, List } from "lucide-react";
+import { X, ThumbsUp, ThumbsDown, Send } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
 import { type UserDto } from "../../api/usersApi";
 import { useUsers } from "../../api/hooks/useUsers";
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
+import { TeamGradesRow } from "../TeamGradesRow";
 import {
   Select,
   SelectContent,
@@ -29,7 +30,7 @@ export interface ProjectInfoModalData {
   description: string;
   semester: string;
   stack: string;
-  teamSize?: string;
+  teamSize?: number;
   upvotes?: number;
   downvotes?: number;
   comments?: Comment[];
@@ -46,10 +47,11 @@ export interface ProjectInfoModalData {
     id: string;
     name: string;
     members: string[];
-    grade?: number;
+    grade?: number | null;
   }>;
   grade?: number;
   creatorId?: string | number;
+  projectId?: string | number;
 }
 
 interface ProjectInfoModalProps {
@@ -71,8 +73,6 @@ interface ProjectInfoModalProps {
       mentorIds: number[];
     }
   ) => void;
-  onGradeTeam?: (teamId: string) => void;
-  onViewGrades?: (teamId: string) => void;
   readOnly?: boolean;
   isOwner?: boolean;
 }
@@ -97,8 +97,6 @@ export const ProjectInfoModal = ({
   onStatusChange,
   onDeleteProject,
   onEditProject,
-  onGradeTeam,
-  onViewGrades,
   readOnly = false,
   isOwner = false,
 }: ProjectInfoModalProps) => {
@@ -477,49 +475,21 @@ export const ProjectInfoModal = ({
                     )}
 
                     {data.teams && data.teams.length > 0 ? (
-                      data.teams.map((team, idx) => (
-                        <section key={idx} className={styles.section}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className={`${styles.sectionTitle} mb-0`}>
-                              Команда: {team.name}
-                            </h3>
-                            {onGradeTeam && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => onGradeTeam(team.id)}
-                              >
-                                Оценить
-                              </Button>
-                            )}
-                            {onViewGrades && (
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => onViewGrades(team.id)}
-                                title="Список оценок"
-                              >
-                                <List className="w-4 h-4 mr-1" />
-                                <span className="text-xs">Оценки</span>
-                              </Button>
-                            )}
-                          </div>
-                          {team.members && team.members.length > 0 && (
-                            <ul className={styles.goalsList}>
-                              {team.members.map((member, mIdx) => (
-                                <li key={mIdx} className={styles.goalsItem}>
-                                  {member}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                          {team.grade !== undefined && team.grade > 0 && (
-                            <p className={styles.text}>
-                              Оценка: {(team.grade ?? 0).toFixed(2)}/100
-                            </p>
-                          )}
-                        </section>
-                      ))
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Команды</h3>
+                        <div className={styles.teamsList}>
+                          {data.teams.map((team, idx) => (
+                            <TeamGradesRow
+                              key={team.id || idx}
+                              teamId={team.id}
+                              projectId={data.id}
+                              teamName={team.name}
+                              averageRating={team.grade}
+                              members={team.members}
+                            />
+                          ))}
+                        </div>
+                      </section>
                     ) : data.teamName ? (
                       <section className={styles.section}>
                         <h3 className={styles.sectionTitle}>Команда</h3>

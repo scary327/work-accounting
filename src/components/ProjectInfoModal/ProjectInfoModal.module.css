@@ -352,6 +352,12 @@
   border: 1px solid #e5e7eb;
 }
 
+.teamsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .teamMember {
   display: flex;
   align-items: center;

@@ -1,0 +1,1 @@
+export { TeamGradesRow } from "./TeamGradesRow";

@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import { Modal } from "../ui/modal";
@@ -21,6 +20,12 @@ export interface ProjectDetails {
     comment: string;
   }>;
   status?: string;
+  teams?: Array<{
+    id: string;
+    name: string;
+    members: string[];
+    grade?: number | null;
+  }>;
 }
 
 interface ProjectDetailsModalProps {
@@ -34,7 +39,8 @@ export const ProjectDetailsModal = ({
   data,
   onClose,
 }: ProjectDetailsModalProps) => {
-  const getGradeLabel = (score: number): string => {
+  const getGradeLabel = (score: number | null | undefined): string => {
+    if (score === null || score === undefined) return "Не оценено";
     if (score >= 85) return "Отлично";
     if (score >= 70) return "Хорошо";
     if (score >= 40) return "Удовлетворительно";
@@ -73,33 +79,71 @@ export const ProjectDetailsModal = ({
           transition={{ delay: 0.1 }}
         >
           <h3 className={styles.sectionTitle}>Команда</h3>
-          <div className={styles.teamNameLabel}>
-            {data.teamId ? (
-              <Link to={`/team/${data.teamId}`} className={styles.teamLink}>
-                {data.teamName}
-              </Link>
-            ) : (
-              <p>{data.teamName}</p>
-            )}
-          </div>
-          <div className={styles.teamContainer}>
-            {data.teamMembers.map((member, idx) => (
-              <div key={idx} className={styles.teamMember}>
-                <div className={styles.memberAvatar}>
-                  {member
-                    .split(" ")
-                    .filter((n) => n.length > 0)
-                    .slice(0, 2)
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
-                </div>
-                <div className={styles.memberInfo}>
-                  <div className={styles.memberName}>{member}</div>
-                </div>
+          {data.teams && data.teams.length > 0 ? (
+            data.teams.map((team, idx) => (
+              <div key={idx} className="mb-4">
+                <div className={styles.teamNameLabel}>{team.name}</div>
+                {team.members && team.members.length > 0 && (
+                  <div className={styles.teamContainer}>
+                    {team.members.map((member, mIdx) => (
+                      <div key={mIdx} className={styles.teamMember}>
+                        <div className={styles.memberAvatar}>
+                          {member
+                            .split(" ")
+                            .filter((n) => n.length > 0)
+                            .slice(0, 2)
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()}
+                        </div>
+                        <div className={styles.memberInfo}>
+                          <div className={styles.memberName}>{member}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {team.grade !== undefined && team.grade !== null && (
+                  <div className={styles.detailText}>
+                    Оценка: {(team.grade ?? 0).toFixed(2)}/100 —{" "}
+                    {getGradeLabel(team.grade)}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            ))
+          ) : data.teamName ? (
+            <>
+              <div className={styles.teamNameLabel}>
+                {data.teamId ? (
+                  <a href={`/team/${data.teamId}`} className={styles.teamLink}>
+                    {data.teamName}
+                  </a>
+                ) : (
+                  <p>{data.teamName}</p>
+                )}
+              </div>
+              <div className={styles.teamContainer}>
+                {data.teamMembers.map((member, idx) => (
+                  <div key={idx} className={styles.teamMember}>
+                    <div className={styles.memberAvatar}>
+                      {member
+                        .split(" ")
+                        .filter((n) => n.length > 0)
+                        .slice(0, 2)
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
+                    </div>
+                    <div className={styles.memberInfo}>
+                      <div className={styles.memberName}>{member}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className={styles.detailText}>Команда не назначена</p>
+          )}
         </motion.div>
 
         {/* Mentor */}
@@ -135,7 +179,7 @@ export const ProjectDetailsModal = ({
           <div className={styles.detailText}>{data.stack.join(", ")}</div>
         </motion.div>
 
-        {/* Checkpoints */}
+        {/* Checkpoints
         <motion.div
           className={styles.section}
           initial={{ opacity: 0, y: 10 }}
@@ -168,7 +212,7 @@ export const ProjectDetailsModal = ({
               </motion.div>
             ))}
 
-            {/* Final grade */}
+            
             <motion.div
               className={styles.finalGrade}
               initial={{ opacity: 0, x: -10 }}
@@ -184,7 +228,7 @@ export const ProjectDetailsModal = ({
               </div>
             </motion.div>
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
 
       <div className={styles.footer}>

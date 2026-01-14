@@ -6,6 +6,7 @@ import { type UserDto } from "../../../api/usersApi";
 import { useUsers } from "../../../api/hooks/useUsers";
 import { Badge } from "../../../components/ui/badge";
 import { Input } from "../../../components/ui/input";
+import { TeamGradesRow } from "../../../components/TeamGradesRow";
 import styles from "./CaseModal.module.css";
 
 export interface Comment {
@@ -21,7 +22,7 @@ export interface CaseModalData {
   description: string;
   semester: string;
   stack: string;
-  teamSize: string;
+  teamSize?: number;
   upvotes: number;
   downvotes: number;
   comments: Comment[];
@@ -29,6 +30,13 @@ export interface CaseModalData {
   status?: string;
   mentorIds?: number[];
   mentors?: { id: number; fio: string }[];
+  teams?: Array<{
+    id: string;
+    name: string;
+    members: string[];
+    grade?: number | null;
+  }>;
+  projectId?: string | number;
 }
 
 interface CaseModalProps {
@@ -385,12 +393,32 @@ export const CaseModal = ({
                       <p className={styles.text}>{data.stack}</p>
                     </section>
 
-                    <section className={styles.section}>
-                      <h3 className={styles.sectionTitle}>
-                        Требуемый размер команды
-                      </h3>
-                      <p className={styles.text}>{data.teamSize}</p>
-                    </section>
+                    {data.teamSize && (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>
+                          Требуемый размер команды
+                        </h3>
+                        <p className={styles.text}>{data.teamSize}</p>
+                      </section>
+                    )}
+
+                    {data.teams && data.teams.length > 0 && (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Команды</h3>
+                        <div className={styles.teamsList}>
+                          {data.teams.map((team, idx) => (
+                            <TeamGradesRow
+                              key={team.id || idx}
+                              teamId={team.id}
+                              projectId={data.id}
+                              teamName={team.name}
+                              averageRating={team.grade}
+                              members={team.members}
+                            />
+                          ))}
+                        </div>
+                      </section>
+                    )}
                   </>
                 )}
               </div>

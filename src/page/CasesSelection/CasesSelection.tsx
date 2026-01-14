@@ -64,7 +64,7 @@ export const CasesSelection = () => {
         description: projectDetails.description,
         semester: projectDetails.semesterName,
         stack: projectDetails.techStack,
-        teamSize: "не указано",
+        teamSize: projectDetails.teamSize,
         upvotes: projectDetails.likesCount,
         downvotes: projectDetails.dislikesCount,
         comments: comments.map((comment) => ({
@@ -76,6 +76,13 @@ export const CasesSelection = () => {
         status: projectDetails.status,
         mentorIds: projectDetails.mentors?.map((m) => m.id) || [],
         mentors: projectDetails.mentors || [],
+        teams: (projectDetails.teams || []).map((team) => ({
+          id: team.id.toString(),
+          name: team.name,
+          members: (team.participants || []).map((p) => p.fio),
+          grade: team.averageRating,
+        })),
+        projectId: projectDetails.id,
       });
     }
   }, [projectDetails, comments]);

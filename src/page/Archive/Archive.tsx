@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAtom } from "@reatom/npm-react";
 import { SearchBar, SemesterBlock, type ArchiveCardData } from "./components";
@@ -18,8 +18,6 @@ import type {
   SemesterDetailsResponse,
   ProjectDetailsResponse,
 } from "../../api/types";
-import { GradeTeamModal } from "../Team/components/GradeTeamModal";
-import { GradesListModal } from "../Team/components/GradesListModal";
 import styles from "./Archive.module.css";
 
 /**
@@ -35,15 +33,6 @@ export const Archive = () => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedProjectDetails, setSelectedProjectDetails] =
     useState<ProjectDetailsResponse | null>(null);
-
-  const [isGradeOpen, setIsGradeOpen] = useState(false);
-  const [selectedTeamIdForGrade, setSelectedTeamIdForGrade] = useState<
-    string | null
-  >(null);
-
-  const [isGradesListOpen, setIsGradesListOpen] = useState(false);
-  const [selectedTeamIdForGradesList, setSelectedTeamIdForGradesList] =
-    useState<string | null>(null);
 
   const [user] = useAtom(userAtom);
   const { notifications, addNotification, removeNotification } =
@@ -117,17 +106,6 @@ export const Archive = () => {
       size: 50,
     }
   );
-
-  const selectedProjectFromList = useMemo(() => {
-    if (!selectedCardId) return null;
-    for (const semester of semestersData) {
-      const project = semester.projects.find(
-        (p) => p.id.toString() === selectedCardId
-      );
-      if (project) return project;
-    }
-    return null;
-  }, [selectedCardId, semestersData]);
 
   // Обработчики
   const handleViewCard = useCallback(async (cardId: string) => {
@@ -213,16 +191,6 @@ export const Archive = () => {
     },
     [addNotification, fetchSemesters]
   );
-
-  const handleGradeTeamClick = useCallback((teamId: string) => {
-    setSelectedTeamIdForGrade(teamId);
-    setIsGradeOpen(true);
-  }, []);
-
-  const handleViewGradesClick = useCallback((teamId: string) => {
-    setSelectedTeamIdForGradesList(teamId);
-    setIsGradesListOpen(true);
-  }, []);
 
   const handleVoteUp = useCallback(
     async (caseId: string) => {
@@ -381,8 +349,6 @@ export const Archive = () => {
         onStatusChange={handleStatusChange}
         onDeleteProject={handleDeleteProject}
         onEditProject={handleEditProject}
-        onGradeTeam={handleGradeTeamClick}
-        onViewGrades={handleViewGradesClick}
         onVoteUp={handleVoteUp}
         onVoteDown={handleVoteDown}
         onCommentSubmit={handleCommentSubmit}
@@ -426,42 +392,21 @@ export const Archive = () => {
                 mentorIds: (selectedProjectDetails.mentors || []).map(
                   (m) => m.id
                 ),
-                teams: (selectedProjectFromList?.teams || [])
+                teams: (selectedProjectDetails.teams || [])
                   .filter((t) => t && t.id)
                   .map((t) => ({
                     id: t.id.toString(),
                     name: t.name || "",
-                    members: t.members || [],
+                    members: (t.participants || []).map((p) => p.fio),
                     grade: t.averageRating,
                   })),
-                teamName: selectedProjectFromList?.teams?.[0]?.name,
-                teamMembers: selectedProjectFromList?.teams?.[0]?.members,
-                grade: selectedProjectFromList?.teams?.[0]?.averageRating,
+                teamSize: selectedProjectDetails.teamSize,
                 userVote: selectedProjectDetails.userVote,
+                projectId: selectedProjectDetails.id,
               }
             : undefined
         }
       />
-      {selectedTeamIdForGrade && (
-        <GradeTeamModal
-          isOpen={isGradeOpen}
-          onClose={() => setIsGradeOpen(false)}
-          teamId={parseInt(selectedTeamIdForGrade)}
-          onSuccess={fetchSemesters}
-          addNotification={addNotification}
-        />
-      )}
-
-      {selectedTeamIdForGradesList && (
-        <GradesListModal
-          isOpen={isGradesListOpen}
-          onClose={() => setIsGradesListOpen(false)}
-          teamId={parseInt(selectedTeamIdForGradesList)}
-          projectId={selectedCardId ? parseInt(selectedCardId) : undefined}
-          addNotification={addNotification}
-        />
-      )}
-
       <NotificationContainer
         notifications={notifications}
         onClose={removeNotification}

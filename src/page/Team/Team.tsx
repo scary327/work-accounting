@@ -143,7 +143,12 @@ export const Team = () => {
         </div>
 
         <div className={styles.content}>
-          <TeamMembers members={teamData.participants} />
+          <TeamMembers
+            members={teamData.participants}
+            teamId={teamData.id}
+            onRemoveSuccess={fetchTeam}
+            addNotification={addNotification}
+          />
           <CurrentProject project={teamData.currentProject} />
           <ProjectHistory
             projects={teamData.projectHistory}

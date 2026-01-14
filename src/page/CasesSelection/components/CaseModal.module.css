@@ -322,3 +322,9 @@
     max-width: 100%;
   }
 }
+
+.teamsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}

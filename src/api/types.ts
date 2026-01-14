@@ -72,6 +72,7 @@ export interface StudentDetailsResponse {
   bio: string;
   telegram?: string;
   currentTeam: string;
+  currentTeamId?: number | null;
   currentProject: ProjectHistoryItem | null;
   completedProjectsCount: number;
   averageGrade: number;
@@ -115,9 +116,22 @@ export interface ProjectDetailsResponse {
   creatorId: number;
   creatorFio: string;
   userVote: boolean | null;
+  teamSize?: number;
   mentors: Array<{
     id: number;
     fio: string;
+  }>;
+  teams?: Array<{
+    id: number;
+    name: string;
+    active: boolean;
+    assignedAt: string;
+    unassignedAt: string | null;
+    participants: Array<{
+      id: number;
+      fio: string;
+    }>;
+    averageRating: number | null;
   }>;
 }
 
