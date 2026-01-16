@@ -3,6 +3,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import rrulePlugin from "@fullcalendar/rrule";
 import ruLocale from "@fullcalendar/core/locales/ru";
 import type {
   DateSelectArg,
@@ -59,15 +60,27 @@ export const CalendarComponent: React.FC = () => {
         info.end.toISOString()
       );
 
-      const mappedEvents = events.map((ev) => ({
-        id: ev.uid,
-        title: ev.summary,
-        start: convertUTCToLocalDisplay(ev.start),
-        end: convertUTCToLocalDisplay(ev.end),
-        extendedProps: {
-          description: ev.description,
-        },
-      }));
+      const mappedEvents = events.map((ev) => {
+        // Для всех событий используем start и end
+        const eventData: Record<string, unknown> = {
+          id: ev.uid,
+          title: ev.summary,
+          start: ev.recurrence ? null : convertUTCToLocalDisplay(ev.start),
+          end: ev.recurrence ? null : convertUTCToLocalDisplay(ev.end),
+          extendedProps: {
+            description: ev.description,
+            location: ev.location,
+            recurrence: ev.recurrence,
+          },
+        };
+
+        // Если есть recurrence, добавляем rruleStr
+        if (ev.recurrence) {
+          eventData.rrule = `${ev.recurrence}`;
+        }
+
+        return eventData;
+      });
 
       successCallback(mappedEvents);
     } catch (error) {
@@ -194,7 +207,12 @@ export const CalendarComponent: React.FC = () => {
       <div className={styles.calendarContainer}>
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+            rrulePlugin,
+          ]}
           locales={[ruLocale]}
           locale="ru"
           initialView="dayGridMonth"
