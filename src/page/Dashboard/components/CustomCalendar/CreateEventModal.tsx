@@ -86,26 +86,36 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  const buildRecurrenceString = (): string | undefined => {
+  const buildRecurrenceString = (startDate: Date): string | undefined => {
     if (!recurrence.isRecurring) return undefined;
 
-    const parts = ["FREQ=WEEKLY"];
+    // Форматируем DTSTART
+    const year = String(startDate.getFullYear()).padStart(4, "0");
+    const month = String(startDate.getMonth() + 1).padStart(2, "0");
+    const day = String(startDate.getDate()).padStart(2, "0");
+    const hours = String(startDate.getHours()).padStart(2, "0");
+    const minutes = String(startDate.getMinutes()).padStart(2, "0");
+    const seconds = String(startDate.getSeconds()).padStart(2, "0");
+
+    const dtstart = `DTSTART:${year}${month}${day}T${hours}${minutes}${seconds}`;
+
+    const rruleParts = ["FREQ=WEEKLY"];
 
     if (recurrence.interval > 1) {
-      parts.push(`INTERVAL=${recurrence.interval}`);
+      rruleParts.push(`INTERVAL=${recurrence.interval}`);
     }
 
     if (recurrence.selectedDays.length > 0) {
-      parts.push(`BYDAY=${recurrence.selectedDays.join(",")}`);
+      rruleParts.push(`BYDAY=${recurrence.selectedDays.join(",")}`);
     }
 
     if (recurrence.endType === "date" && recurrence.endDate) {
-      // Convert YYYY-MM-DD to YYYYMMDDTHHMMSSZ
-      const [year, month, day] = recurrence.endDate.split("-");
-      parts.push(`UNTIL=${year}${month}${day}T235959Z`);
+      const [endYear, endMonth, endDay] = recurrence.endDate.split("-");
+      rruleParts.push(`UNTIL=${endYear}${endMonth}${endDay}T235959`);
     }
 
-    return parts.join(";");
+    const rrule = `RRULE:${rruleParts.join(";")}`;
+    return `${dtstart}\n${rrule}`;
   };
 
   const toggleDay = (day: DayOfWeek) => {
@@ -247,9 +257,9 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
         summary: title,
         description: description,
         location: location,
-        start: startDate.toISOString(),
-        end: endDate.toISOString(),
-        recurrence: buildRecurrenceString(),
+        start: recurrence.isRecurring ? "" : startDate.toISOString(),
+        end: recurrence.isRecurring ? "" : endDate.toISOString(),
+        recurrence: buildRecurrenceString(startDate),
       };
 
       await onSubmit(newEvent);
