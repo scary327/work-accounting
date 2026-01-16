@@ -4,8 +4,10 @@ export interface CalendarEventDto {
   uid?: string;
   summary: string;
   description?: string;
+  location?: string;
   start: string;
   end: string;
+  recurrence?: string;
 }
 
 export const calendarApi = {
