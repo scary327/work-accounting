@@ -145,6 +145,8 @@ export const CalendarComponent: React.FC = () => {
       uid: event.id,
       summary: event.title,
       description: (event.extendedProps?.description as string) || "",
+      location: (event.extendedProps?.location as string) || "",
+      recurrence: (event.extendedProps?.recurrence as string) || "",
       start: event.start?.toISOString() || new Date().toISOString(),
       end: event.end?.toISOString() || new Date().toISOString(),
     });
